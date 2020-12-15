@@ -21,6 +21,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "dma.h"
+#include "i2c.h"
 #include "gpio.h"
 #include "fmc.h"
 
@@ -28,8 +29,12 @@
 /* USER CODE BEGIN Includes */
 #include "drv/ili9341v/ili9341v.h"
 #include "drv/lcd.h"
+#include "drv/ft6236u/ft6236u.h"
+
 
 #include "lvgl/lvgl.h"
+#include "hal_lvgl_touch.h"
+
 #include "lv_demo_widget.h"
 #include "icon.h"
 /* USER CODE END Includes */
@@ -100,16 +105,20 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_FMC_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   lv_init();
   display_init();
+  touch_init();
+
   HAL_Delay(10);
   display_fill(0, 0, DISP_HOR, DISP_VER, 0xAAAA, NULL);
   HAL_Delay(100);
-//  display_fill(5, 20, 25, 25, 0x0000, NULL);
+  //  display_fill(5, 20, 25, 25, 0x0000, NULL);
   tft_init();
+  hal_lvgl_touch_init();
   HAL_Delay(100);
-//  display_bitmap(0,0,47,47,(uint16_t*)test_map, NULL);
+  //  display_bitmap(0,0,47,47,(uint16_t*)test_map, NULL);
   HAL_Delay(10);
   lv_demo_widgets();
 
@@ -118,7 +127,7 @@ int main(void)
   /* Init scheduler */
 //  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
 //  MX_FREERTOS_Init();
-  /* Start scheduler */
+//  /* Start scheduler */
 //  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
@@ -129,8 +138,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		HAL_Delay(10);
-			lv_task_handler();
+    HAL_Delay(10);
+    lv_task_handler();
   }
   /* USER CODE END 3 */
 }
@@ -143,6 +152,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
   */
@@ -180,6 +190,12 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+  PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }

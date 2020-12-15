@@ -61,10 +61,15 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LCD_BACKLIGHT_Pin GPIO_PIN_5
 #define LCD_BACKLIGHT_GPIO_Port GPIOA
+#define TS_INT_Pin GPIO_PIN_2
+#define TS_INT_GPIO_Port GPIOB
+#define TS_INT_EXTI_IRQn EXTI2_IRQn
 #define LED_RED_Pin GPIO_PIN_10
 #define LED_RED_GPIO_Port GPIOA
 #define LED_GREEN_Pin GPIO_PIN_2
 #define LED_GREEN_GPIO_Port GPIOD
+#define TS_RST_Pin GPIO_PIN_0
+#define TS_RST_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
