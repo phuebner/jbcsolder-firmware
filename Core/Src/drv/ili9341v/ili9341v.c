@@ -275,7 +275,7 @@ void display_init(void)
 	HAL_Delay(120);
 //	COMMAND(0x13); //Normal display mode
 //	HAL_Delay(120);
-	COMMAND(0x21);
+//	COMMAND(0x21);
 	COMMAND(0x29); //Display on
 
 	HAL_Delay(50);

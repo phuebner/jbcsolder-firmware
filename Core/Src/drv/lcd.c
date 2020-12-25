@@ -37,9 +37,17 @@
 
 /*These 3 functions are needed by LittlevGL*/
 static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_p);
+//#if LV_USE_GPU
+//static void gpu_mem_blend(lv_disp_drv_t *disp_drv, lv_color_t * dest, const lv_color_t * src, uint32_t length, lv_opa_t opa);
+//static void gpu_mem_fill(lv_disp_drv_t *disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width, const lv_area_t * fill_area, lv_color_t color);
+//#endif
 
 /*LCD*/
-static void LCD_Config(void);
+//static void LCD_Config(void);
+
+//#if LV_USE_GPU
+//static void DMA2D_Config(void);
+//#endif
 
 /*DMA to flush to frame buffer*/
 //static void DMA_Config(void);
@@ -50,9 +58,11 @@ static void Error_Handler(void);
 /**********************
  *  STATIC VARIABLES
  **********************/
+//#if LV_USE_GPU
+//static DMA2D_HandleTypeDef Dma2dHandle;
+//#endif
 
-
-static uint16_t my_fb[DISP_HOR * DISP_VER];
+//static uint16_t my_fb[DISP_HOR * DISP_VER];
 
 
 DMA_HandleTypeDef     DmaHandle;
@@ -83,14 +93,21 @@ void monitor_cb(lv_disp_drv_t * d, uint32_t t, uint32_t p)
  */
 void tft_init(void)
 {
-	static lv_color_t disp_buf1[DISP_HOR * 40];
-	static lv_disp_buf_t buf;
-	lv_disp_buf_init(&buf, disp_buf1, NULL, DISP_HOR * 40);
+	/* LittlevGL requires a buffer where it draws the objects. The buffer's has to be greater than 1 display row*/
+	static lv_disp_buf_t disp_buf_1;
+	static lv_color_t buf1_1[LV_HOR_RES_MAX * LV_VER_RES_MAX/2];
+//	static lv_color_t buf1_2[LV_HOR_RES_MAX * 68];
+	lv_disp_buf_init(&disp_buf_1, buf1_1, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX/2);   /*Initialize the display buffer*/
 
 	lv_disp_drv_init(&disp_drv);
 
 //	DMA_Config();
-	disp_drv.buffer = &buf;
+	/*Set a display buffer*/
+	disp_drv.buffer = &disp_buf_1;
+	/*Set the resolution of the display*/
+	disp_drv.hor_res = LV_HOR_RES_MAX;
+	disp_drv.ver_res = LV_VER_RES_MAX;
+	/*Used to copy the buffer's content to the display*/
 	disp_drv.flush_cb = tft_flush;
 	disp_drv.monitor_cb = monitor_cb;
 	lv_disp_drv_register(&disp_drv);
@@ -100,7 +117,16 @@ void tft_init(void)
  *   STATIC FUNCTIONS
  **********************/
 static void tft_flush_complete_callback(){
-	lv_disp_flush_ready(&disp_drv);
+//	y_fill_act ++;
+//	if(y_fill_act > y2_fill) {
+    	SCB_CleanInvalidateDCache();
+    	SCB_InvalidateICache();
+		lv_disp_flush_ready(&disp_drv);
+//	} else {
+//    	uint32_t length = (x2_flush - x1_flush + 1);
+//        buf_to_flush += x2_flush - x1_flush + 1;
+//        display_bitmap(x1_flush, y1_flush, x2_flush, y2_fill, (uint16_t*) buf_to_flush, tft_flush_complete_callback);
+//	}
 }
 
 /**
@@ -131,6 +157,9 @@ static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * 
 	y2_fill = act_y2;
 	y_fill_act = act_y1;
 	buf_to_flush = color_p;
+
+	SCB_CleanInvalidateDCache();
+	SCB_InvalidateICache();
 
 	display_bitmap(x1_flush, y1_flush, x2_flush, y2_fill, (uint16_t*) buf_to_flush, tft_flush_complete_callback);
 //	HAL_Delay(100);

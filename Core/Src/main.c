@@ -19,24 +19,26 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
+#include "adc.h"
 #include "dma.h"
 #include "i2c.h"
+#include "tim.h"
 #include "gpio.h"
 #include "fmc.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "delay.h"
 #include "drv/ili9341v/ili9341v.h"
 #include "drv/lcd.h"
 #include "drv/ft6236u/ft6236u.h"
-
+#include "iron.h"
 
 #include "lvgl/lvgl.h"
 #include "hal_lvgl_touch.h"
 
 #include "lv_demo_widget.h"
-#include "icon.h"
+#include "gui/main_screen.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,14 +64,12 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MPU_Config(void);
-void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -98,7 +98,13 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  /* Enable I-Cache */
+  SCB_EnableICache();
 
+  /* Enable D-Cache */
+  SCB_EnableDCache();
+
+//  Delay_Init();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -106,13 +112,15 @@ int main(void)
   MX_DMA_Init();
   MX_FMC_Init();
   MX_I2C1_Init();
+  MX_ADC1_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
   lv_init();
   display_init();
   touch_init();
 
   HAL_Delay(10);
-  display_fill(0, 0, DISP_HOR, DISP_VER, 0xAAAA, NULL);
+  display_fill(0, 0, DISP_HOR, DISP_VER, 0xFFFF, NULL);
   HAL_Delay(100);
   //  display_fill(5, 20, 25, 25, 0x0000, NULL);
   tft_init();
@@ -120,17 +128,10 @@ int main(void)
   HAL_Delay(100);
   //  display_bitmap(0,0,47,47,(uint16_t*)test_map, NULL);
   HAL_Delay(10);
-  lv_demo_widgets();
-
+//  lv_demo_widgets();
+  gui_main_screen();
   /* USER CODE END 2 */
 
-  /* Init scheduler */
-//  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
-//  MX_FREERTOS_Init();
-//  /* Start scheduler */
-//  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -140,6 +141,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     HAL_Delay(10);
     lv_task_handler();
+//    temp = iron_adc_read(&hadc1);
   }
   /* USER CODE END 3 */
 }
@@ -161,15 +163,14 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
   RCC_OscInitStruct.PLL.PLLN = 216;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();

@@ -59,17 +59,38 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BUTTON_ENC_Pin GPIO_PIN_0
+#define BUTTON_ENC_GPIO_Port GPIOA
+#define ADC_TCA_IN_Pin GPIO_PIN_1
+#define ADC_TCA_IN_GPIO_Port GPIOA
 #define LCD_BACKLIGHT_Pin GPIO_PIN_5
 #define LCD_BACKLIGHT_GPIO_Port GPIOA
+#define TCA_AMPLIFIER_EN_Pin GPIO_PIN_7
+#define TCA_AMPLIFIER_EN_GPIO_Port GPIOA
 #define TS_INT_Pin GPIO_PIN_2
 #define TS_INT_GPIO_Port GPIOB
 #define TS_INT_EXTI_IRQn EXTI2_IRQn
+#define BUTTON_1_Pin GPIO_PIN_11
+#define BUTTON_1_GPIO_Port GPIOD
+#define BUTTON_2_Pin GPIO_PIN_12
+#define BUTTON_2_GPIO_Port GPIOD
+#define BUTTON_3_Pin GPIO_PIN_13
+#define BUTTON_3_GPIO_Port GPIOD
+#define SLEEP_A_Pin GPIO_PIN_8
+#define SLEEP_A_GPIO_Port GPIOC
+#define SLEEP_B_Pin GPIO_PIN_9
+#define SLEEP_B_GPIO_Port GPIOC
 #define LED_RED_Pin GPIO_PIN_10
 #define LED_RED_GPIO_Port GPIOA
+#define HEATER_A_EN_Pin GPIO_PIN_11
+#define HEATER_A_EN_GPIO_Port GPIOC
 #define LED_GREEN_Pin GPIO_PIN_2
 #define LED_GREEN_GPIO_Port GPIOD
 #define TS_RST_Pin GPIO_PIN_0
 #define TS_RST_GPIO_Port GPIOE
+#define ZERO_CROSS_Pin GPIO_PIN_1
+#define ZERO_CROSS_GPIO_Port GPIOE
+#define ZERO_CROSS_EXTI_IRQn EXTI1_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
