@@ -32,7 +32,6 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <http://www.gnu.org/licenses/>.
 //*********************************************************************************
-#if 0
 //
 // Header Guard
 //
@@ -301,7 +300,7 @@ extern void PIDSampleTimeSet(PIDControl *pid, float sampleTimeSeconds);
 // Returns:
 //      Nothing.
 //
-inline void PIDSetpointSet(PIDControl *pid, float setpoint) {
+static inline void PIDSetpointSet(PIDControl *pid, float setpoint) {
 	pid->setpoint = setpoint;
 }
 
@@ -316,7 +315,7 @@ inline void PIDSetpointSet(PIDControl *pid, float setpoint) {
 // Returns:
 //      Nothing.
 //
-inline void PIDInputSet(PIDControl *pid, float input) {
+static inline void PIDInputSet(PIDControl *pid, float input) {
 	pid->input = input;
 }
 
@@ -330,7 +329,7 @@ inline void PIDInputSet(PIDControl *pid, float input) {
 // Returns:
 //      The output of the specific PID controller.
 //
-inline float PIDOutputGet(PIDControl *pid) {
+static inline float PIDOutputGet(PIDControl *pid) {
 	return pid->output;
 }
 
@@ -344,7 +343,7 @@ inline float PIDOutputGet(PIDControl *pid) {
 // Returns:
 //      The proportional gain constant.
 //
-inline float PIDKpGet(PIDControl *pid) {
+static inline float PIDKpGet(PIDControl *pid) {
 	return pid->dispKp;
 }
 
@@ -358,7 +357,7 @@ inline float PIDKpGet(PIDControl *pid) {
 // Returns:
 //      The integral gain constant.
 //
-inline float PIDKiGet(PIDControl *pid) {
+static inline float PIDKiGet(PIDControl *pid) {
 	return pid->dispKi;
 }
 
@@ -372,7 +371,7 @@ inline float PIDKiGet(PIDControl *pid) {
 // Returns:
 //      The derivative gain constant.
 //
-inline float PIDKdGet(PIDControl *pid) {
+static inline float PIDKdGet(PIDControl *pid) {
 	return pid->dispKd;
 }
 
@@ -386,7 +385,7 @@ inline float PIDKdGet(PIDControl *pid) {
 //      MANUAL or AUTOMATIC depending on what the user set the
 //      controller to.
 //
-inline PIDMode PIDModeGet(PIDControl *pid) {
+static inline PIDMode PIDModeGet(PIDControl *pid) {
 	return pid->mode;
 }
 
@@ -400,7 +399,7 @@ inline PIDMode PIDModeGet(PIDControl *pid) {
 //      DIRECT or REVERSE depending on what the user set the
 //      controller to.
 //
-inline PIDDirection PIDDirectionGet(PIDControl *pid) {
+static inline PIDDirection PIDDirectionGet(PIDControl *pid) {
 	return pid->controllerDirection;
 }
 
@@ -412,4 +411,3 @@ inline PIDDirection PIDDirectionGet(PIDControl *pid) {
 #endif
 
 #endif  // PID_CONTROLLER_H
-#endif

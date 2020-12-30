@@ -80,6 +80,10 @@ void Error_Handler(void);
 #define SLEEP_A_GPIO_Port GPIOC
 #define SLEEP_B_Pin GPIO_PIN_9
 #define SLEEP_B_GPIO_Port GPIOC
+#define ENC_A_Pin GPIO_PIN_8
+#define ENC_A_GPIO_Port GPIOA
+#define ENC_B_Pin GPIO_PIN_9
+#define ENC_B_GPIO_Port GPIOA
 #define LED_RED_Pin GPIO_PIN_10
 #define LED_RED_GPIO_Port GPIOA
 #define HEATER_A_EN_Pin GPIO_PIN_11

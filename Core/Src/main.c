@@ -36,6 +36,7 @@
 
 #include "lvgl/lvgl.h"
 #include "hal_lvgl_touch.h"
+#include "hal_lvgl_encoder.h"
 
 #include "lv_demo_widget.h"
 #include "gui/main_screen.h"
@@ -114,6 +115,7 @@ int main(void)
   MX_I2C1_Init();
   MX_ADC1_Init();
   MX_TIM7_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   lv_init();
   display_init();
@@ -125,11 +127,15 @@ int main(void)
   //  display_fill(5, 20, 25, 25, 0x0000, NULL);
   tft_init();
   hal_lvgl_touch_init();
+
+  HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
+  hal_lvgl_encoder_init();
   HAL_Delay(100);
   //  display_bitmap(0,0,47,47,(uint16_t*)test_map, NULL);
   HAL_Delay(10);
 //  lv_demo_widgets();
   gui_main_screen();
+  iron_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -139,7 +145,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    HAL_Delay(10);
+//    HAL_Delay(10);
     lv_task_handler();
 //    temp = iron_adc_read(&hadc1);
   }
