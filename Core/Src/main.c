@@ -23,6 +23,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "tim.h"
+#include "usb_device.h"
 #include "gpio.h"
 #include "fmc.h"
 
@@ -40,6 +41,7 @@
 
 #include "lv_demo_widget.h"
 #include "gui/main_screen.h"
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -100,10 +102,10 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
   /* Enable I-Cache */
-  SCB_EnableICache();
+//  SCB_EnableICache();
 
   /* Enable D-Cache */
-  SCB_EnableDCache();
+//  SCB_EnableDCache();
 
 //  Delay_Init();
   /* USER CODE END SysInit */
@@ -116,7 +118,10 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM7_Init();
   MX_TIM1_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
+  iron_init();
+
   lv_init();
   display_init();
   touch_init();
@@ -124,29 +129,30 @@ int main(void)
   HAL_Delay(10);
   display_fill(0, 0, DISP_HOR, DISP_VER, 0xFFFF, NULL);
   HAL_Delay(100);
-  //  display_fill(5, 20, 25, 25, 0x0000, NULL);
   tft_init();
   hal_lvgl_touch_init();
 
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
   hal_lvgl_encoder_init();
-  HAL_Delay(100);
-  //  display_bitmap(0,0,47,47,(uint16_t*)test_map, NULL);
+
   HAL_Delay(10);
+
 //  lv_demo_widgets();
   gui_main_screen();
-  iron_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	  uint8_t buffer[] = "Hello, World!\r\n";
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 //    HAL_Delay(10);
-    lv_task_handler();
+	  lv_task_handler();
+	  CDC_Transmit_HS(buffer, sizeof(buffer));
+	  HAL_Delay(10);
 //    temp = iron_adc_read(&hadc1);
   }
   /* USER CODE END 3 */
@@ -200,8 +206,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_CLK48;
   PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();

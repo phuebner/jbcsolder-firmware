@@ -133,7 +133,7 @@ static uint16_t iron_adc_read(ADC_HandleTypeDef *hadc)
 	uint16_t value = 0;
 	HAL_ADC_Start(hadc);
 
-	HAL_ADC_PollForConversion(hadc, 20);
+	HAL_ADC_PollForConversion(hadc, 1); // 1ms timeout
 
 	if ((HAL_ADC_GetState(hadc) & HAL_ADC_STATE_EOC_REG) == HAL_ADC_STATE_EOC_REG)
 	{

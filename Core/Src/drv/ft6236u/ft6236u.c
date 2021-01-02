@@ -24,7 +24,6 @@ void touch_init()
 	HAL_Delay(300);
 	uint8_t res[1];
 	HAL_I2C_Mem_Read(&hi2c1, FT6236_I2C_ADDRESS, 0xA3, I2C_MEMADD_SIZE_8BIT, res, 1, 1000);
-	printf("Touch ID = %c", res[0]);
 }
 
 void touch_record_event()

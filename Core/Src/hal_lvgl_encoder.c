@@ -20,8 +20,9 @@ lv_indev_t *enc_indev;
 static bool hal_lvgl_encoder_read(lv_indev_drv_t * drv, lv_indev_data_t*data)
 {
     int32_t enc_diff = ((int16_t)(htim1.Instance->CNT))/2;
-    if(enc_diff != 0)
+    if(enc_diff != 0) {
     	htim1.Instance->CNT = 0; //reset counter
+    }
 
 	data->enc_diff = enc_diff;
     data->state = (HAL_GPIO_ReadPin(BUTTON_ENC_GPIO_Port, BUTTON_ENC_Pin) == GPIO_PIN_SET) ?
