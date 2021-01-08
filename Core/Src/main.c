@@ -86,7 +86,7 @@ int main(void)
   /* USER CODE END 1 */
 
   /* MPU Configuration--------------------------------------------------------*/
-  MPU_Config();
+   MPU_Config();
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -102,10 +102,10 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
   /* Enable I-Cache */
-//  SCB_EnableICache();
+  SCB_EnableICache();
 
   /* Enable D-Cache */
-//  SCB_EnableDCache();
+  SCB_EnableDCache();
 
 //  Delay_Init();
   /* USER CODE END SysInit */
@@ -138,7 +138,7 @@ int main(void)
   HAL_Delay(10);
 
 //  lv_demo_widgets();
-  gui_main_screen();
+  gui_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,8 +151,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 //    HAL_Delay(10);
 	  lv_task_handler();
-	  CDC_Transmit_HS(buffer, sizeof(buffer));
-	  HAL_Delay(10);
+//	  CDC_Transmit_HS(buffer, sizeof(buffer));
+//	  HAL_Delay(10);
 //    temp = iron_adc_read(&hadc1);
   }
   /* USER CODE END 3 */

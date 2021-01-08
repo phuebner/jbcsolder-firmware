@@ -56,6 +56,7 @@ void iron_set_enable(_Bool value);
 
 uint16_t iron_get_temperature();
 uint16_t iron_get_setpoint();
+float iron_get_power();
 iron_state_t iron_get_state();
 
 _Bool iron_is_enabled();

@@ -107,6 +107,11 @@ uint16_t iron_get_setpoint()
 	return (float) iron.setpoint;
 }
 
+float iron_get_power()
+{
+	return pid.output;
+}
+
 iron_state_t iron_get_state()
 {
 	return iron.state;
@@ -186,7 +191,8 @@ static void iron_update_status()
 /* -------------------------------------------------------------------------- */
 
 /**
- * IRON STATE MACHINE BASED ON TIMER INTERRUPTS
+ * @brief Iron state machine based on timer interrupt
+ * 
  */
 void iron_timer_irq_handler()
 {
@@ -225,11 +231,6 @@ void iron_timer_irq_handler()
 		HAL_TIM_Base_Start_IT(&htim7);
 		break;
 	case IRON_SM_STATE_CONTROL_IRON:
-//		if(HAL_GPIO_ReadPin(BUTTON_1_GPIO_Port, BUTTON_1_Pin) == GPIO_PIN_SET)
-//			heater_en = true;
-//		else
-//			heater_en = false;
-
 		if (iron.state != IRON_STATE_OFF) {
 			if(cycle % power == 0)
 				HAL_GPIO_WritePin(HEATER_A_EN_GPIO_Port, HEATER_A_EN_Pin, GPIO_PIN_SET);

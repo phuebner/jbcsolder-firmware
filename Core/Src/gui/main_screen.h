@@ -8,6 +8,6 @@
 #ifndef SRC_GUI_MAIN_SCREEN_H_
 #define SRC_GUI_MAIN_SCREEN_H_
 
-void gui_main_screen(void);
+void gui_init(void);
 
 #endif /* SRC_GUI_MAIN_SCREEN_H_ */
