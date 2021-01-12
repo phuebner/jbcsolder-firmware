@@ -93,20 +93,17 @@ static void styles_init(void)
 
     /* Titlebar button */
     lv_style_init(&sty_titlebar_btn);
-    lv_style_set_bg_opa(&sty_titlebar_btn, LV_STATE_DEFAULT,
-            LV_OPA_TRANSP);
+    lv_style_set_bg_opa(&sty_titlebar_btn, LV_STATE_DEFAULT, LV_OPA_TRANSP);
     lv_style_set_text_color(&sty_titlebar_btn, LV_STATE_DEFAULT, COLOR_WHITE);
     lv_style_set_value_color(&sty_titlebar_btn, LV_STATE_DEFAULT, COLOR_WHITE);
-    lv_style_set_text_font(&sty_titlebar_btn, LV_STATE_DEFAULT, &lv_font_montserrat_24);
-    lv_style_set_margin_all(&sty_titlebar_btn, LV_STATE_DEFAULT, 0);
-    lv_style_set_pad_all(&sty_titlebar_btn, LV_STATE_DEFAULT, 0);
+    lv_style_set_text_font(&sty_titlebar_btn, LV_STATE_DEFAULT, &lv_font_symbols_24);
+    // lv_style_set_margin_all(&sty_titlebar_btn, LV_STATE_DEFAULT, 0);
+    // lv_style_set_pad_all(&sty_titlebar_btn, LV_STATE_DEFAULT, 0);
 
     /* Preset drawer background */
     lv_style_init(&sty_preset_drawer_bg);
-    lv_style_set_bg_opa(&sty_preset_drawer_bg, LV_STATE_DEFAULT,
-            LV_OPA_COVER);
-    lv_style_set_bg_color(&sty_preset_drawer_bg, LV_STATE_DEFAULT,
-            COLOR_BG_PRESET_DRAWER);
+    lv_style_set_bg_opa(&sty_preset_drawer_bg, LV_STATE_DEFAULT, LV_OPA_COVER);
+    lv_style_set_bg_color(&sty_preset_drawer_bg, LV_STATE_DEFAULT, COLOR_BG_PRESET_DRAWER);
     lv_style_set_radius(&sty_preset_drawer_bg, LV_STATE_DEFAULT, 10);
     /*Add a shadow*/
     lv_style_set_shadow_width(&sty_preset_drawer_bg, LV_STATE_DEFAULT, 15);
@@ -117,11 +114,11 @@ static void styles_init(void)
 
     /* Preset button */
     lv_style_init(&sty_preset_btn);
-    lv_style_set_bg_opa(&sty_preset_btn, LV_STATE_DEFAULT,
-            LV_OPA_TRANSP);
+    lv_style_set_bg_opa(&sty_preset_btn, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_style_set_bg_opa(&sty_preset_btn, LV_STATE_PRESSED, LV_OPA_30);
+    lv_style_set_bg_color(&sty_preset_btn, LV_STATE_PRESSED, LV_COLOR_BLACK);
     lv_style_set_text_color(&sty_preset_btn, LV_STATE_DEFAULT, COLOR_WHITE);
-    lv_style_set_value_color(&sty_preset_btn, LV_STATE_DEFAULT, COLOR_WHITE);
-    lv_style_set_text_font(&sty_preset_btn, LV_STATE_DEFAULT, &lv_font_montserrat_24);
+    lv_style_set_text_font(&sty_preset_btn, LV_STATE_DEFAULT, &lv_font_roboto_28);
     lv_style_set_margin_all(&sty_preset_btn, LV_STATE_DEFAULT, 0);
     lv_style_set_pad_all(&sty_preset_btn, LV_STATE_DEFAULT, 0);
 

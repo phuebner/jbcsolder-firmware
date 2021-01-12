@@ -41,6 +41,12 @@ extern "C" {
 // #define LV_DEMO_PRINTER_GREEN           lv_color_hex(0x4cb242)
 // #define LV_DEMO_PRINTER_RED             lv_color_hex(0xd51732)
 
+#define PRESET_DRAWER_WIDTH		80
+#define PRESET_DRAWER_HEIGHT	(LV_VER_RES_MAX - 21)
+
+#define TITLEBAR_HEIGHT			35
+
+#define LV_SYMBOL_BARS           "\xef\x83\x89"
 /* -------------------------------------------------------------------------- */
 /*                                  TYPEDEFS                                  */
 /* -------------------------------------------------------------------------- */

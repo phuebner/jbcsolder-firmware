@@ -92,10 +92,10 @@ void lv_my_widget(void)
   // lv_label_set_text(btn_lbl, "Start");
 
   uint8_t temperature = 300;
-  lv_obj_t *lbl_current_temp = lv_label_create(lv_scr_act(), NULL);
-  lv_obj_set_pos(lbl_current_temp, 50, 50);
-  lv_obj_add_style(lbl_current_temp, LV_LABEL_PART_MAIN, &sty_current_temp);
-  lv_label_set_text_fmt(lbl_current_temp, "%d°C", temperature);
+  lv_obj_t *lbl_temperature = lv_label_create(lv_scr_act(), NULL);
+  lv_obj_set_pos(lbl_temperature, 50, 50);
+  lv_obj_add_style(lbl_temperature, LV_LABEL_PART_MAIN, &sty_current_temp);
+  lv_label_set_text_fmt(lbl_temperature, "%d°C", temperature);
 }
 
 /**********************

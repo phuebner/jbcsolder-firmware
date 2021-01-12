@@ -381,7 +381,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
  * https://fonts.google.com/specimen/Montserrat  */
 #define LV_FONT_MONTSERRAT_8     0
 #define LV_FONT_MONTSERRAT_10    0
-#define LV_FONT_MONTSERRAT_12    1
+#define LV_FONT_MONTSERRAT_12    0
 #define LV_FONT_MONTSERRAT_14    1
 #define LV_FONT_MONTSERRAT_16    0
 #define LV_FONT_MONTSERRAT_18    1
@@ -423,13 +423,20 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 #define LV_FONT_ROBOTOT_80	1
 #define LV_FONT_ROBOTOT_40	1
 #define LV_FONT_ROBOTOT_52	0
+#define LV_FONT_ROBOTOT_14	1
+#define LV_FONT_ROBOTOT_28	1
+
 
 
 #define LV_FONT_CUSTOM_DECLARE 	LV_FONT_DECLARE(lv_font_montserrat_80) \
 								LV_FONT_DECLARE(lv_font_montserrat_120) \
 								LV_FONT_DECLARE(lv_font_roboto_80) \
 								LV_FONT_DECLARE(lv_font_roboto_40) \
-								LV_FONT_DECLARE(lv_font_roboto_regular_52)
+								LV_FONT_DECLARE(lv_font_roboto_regular_52) \
+								LV_FONT_DECLARE(lv_font_roboto_14) \
+								LV_FONT_DECLARE(lv_font_roboto_28) \
+								LV_FONT_DECLARE(lv_font_symbols_28) \
+								LV_FONT_DECLARE(lv_font_symbols_24)
 
 
 /* Enable it if you have fonts with a lot of characters.
