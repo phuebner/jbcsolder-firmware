@@ -43,7 +43,7 @@ static uint16_t power = 0xFFFF;
  */
 void iron_init()
 {
-	iron.cfg.sleept_temperature = 80;
+	iron.cfg.sleep_temperature = 80;
 
 	iron.setpoint = 200.0;
 	iron.state = IRON_STATE_OFF;
@@ -82,6 +82,11 @@ float iron_get_power()
 iron_state_t iron_get_state()
 {
 	return iron.state;
+}
+
+uint32_t iron_get_seconds_till_hibernate()
+{
+	return 60;
 }
 
 _Bool iron_is_enabled()

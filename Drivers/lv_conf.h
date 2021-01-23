@@ -424,6 +424,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 #define LV_FONT_ROBOTOT_40	1
 #define LV_FONT_ROBOTOT_52	0
 #define LV_FONT_ROBOTOT_14	1
+#define LV_FONT_ROBOTOT_20	1
 #define LV_FONT_ROBOTOT_28	1
 
 
@@ -434,6 +435,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 								LV_FONT_DECLARE(lv_font_roboto_40) \
 								LV_FONT_DECLARE(lv_font_roboto_regular_52) \
 								LV_FONT_DECLARE(lv_font_roboto_14) \
+								LV_FONT_DECLARE(lv_font_roboto_20) \
 								LV_FONT_DECLARE(lv_font_roboto_28) \
 								LV_FONT_DECLARE(lv_font_symbols_28) \
 								LV_FONT_DECLARE(lv_font_symbols_24)

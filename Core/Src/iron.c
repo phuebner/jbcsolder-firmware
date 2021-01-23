@@ -13,12 +13,20 @@
 #include <stdbool.h>
 
 /* -------------------------------------------------------------------------- */
+/*                                   DEFINES                                  */
+/* -------------------------------------------------------------------------- */
+
+#define PID_OUT_GRANULARITY		20
+#define IRON_TEMPERATURE_MAX	450
+#define IRON_TEMPERATURE_MIN	50
+
+/* -------------------------------------------------------------------------- */
 /*                              STATIC PROTOTYPES                             */
 /* -------------------------------------------------------------------------- */
 
 static uint16_t iron_adc_read(ADC_HandleTypeDef *hadc);
 static void iron_calculate_temperature(uint16_t adc_value);
-static void iron_update_status();
+static void iron_update_state();
 
 /* -------------------------------------------------------------------------- */
 /*                              TYPE DEFINITIONS                              */
@@ -65,29 +73,37 @@ static float pid_out;
  */
 void iron_init()
 {
-	iron.cfg.sleept_temperature = 80;
+	iron.cfg.sleep_temperature = 80;
+	iron.cfg.hibernate_delay = 6000; // 1 minute
 
-	iron.setpoint = 200.0;
-	iron.state = IRON_STATE_OFF;
+	iron.setpoint = 200;
+	iron.state = IRON_STATE_NOT_CONNECTED;
+	iron.enabled = false;
 
 
 	PIDInit(&pid, 1.3, 0, 0.01,
-			0.01, 0, 20, AUTOMATIC,
+			0.01, 0, PID_OUT_GRANULARITY, AUTOMATIC,
 			DIRECT);
-	pid.setpoint = 200.0;
+	PIDSetpointSet(&pid, 0.0);
 }
 
 /* ---------------------------- Setter Functions ---------------------------- */
 
 void iron_set_setpoint(uint16_t temperature)
 {
-	iron.setpoint = (float) temperature;
-	PIDSetpointSet(&pid, iron.setpoint);
+	// Constrain temperature
+	temperature = (temperature <= IRON_TEMPERATURE_MAX) ? temperature : IRON_TEMPERATURE_MAX;
+	temperature = (temperature >= IRON_TEMPERATURE_MIN) ? temperature : IRON_TEMPERATURE_MIN;
+	// Set temperature
+	iron.setpoint = temperature;
+	// Immediately update pid setpoint if iron is active
+	if(iron.state == IRON_STATE_ACTIVE)
+		PIDSetpointSet(&pid, (float) iron.setpoint);
 }
 
 void iron_set_enable(_Bool value)
 {
-	iron.state = value ? IRON_STATE_HIBERNATE : IRON_STATE_OFF;
+	iron.enabled = value;
 }
 
 // void iron_set_state_change_cb(iron_state_change_cb_t cb)
@@ -117,9 +133,14 @@ iron_state_t iron_get_state()
 	return iron.state;
 }
 
+uint32_t iron_get_seconds_till_hibernate()
+{
+	return (iron.cfg.hibernate_delay - iron.hibernate_timer) / 100;
+}
+
 _Bool iron_is_enabled()
 {
-	return iron.state != IRON_STATE_OFF;
+	return iron.enabled;
 }
 
 _Bool iron_is_sleeping()
@@ -155,33 +176,53 @@ static void iron_calculate_temperature(uint16_t adc_value)
 	temperature_smooth = (temperature * alpha + temperature_smooth * (1.0 - alpha));
 }
 
-static void iron_update_status()
+static void iron_update_state()
 {
-	static iron_state_t prev_state;
-	iron_state_t new_state;
-
-	if(iron.state == IRON_STATE_OFF)
+	// A large ADC value (saturation) indicates that the iron is not connected
+	if(temperature > 550.0)
+	{
+		PIDSetpointSet(&pid, 0.0);
+		iron.state = IRON_STATE_NOT_CONNECTED;
 		return;
+	}
 
+	// If iron is connected but not enabled set state off
+	if(iron.enabled == false)
+	{	
+		PIDSetpointSet(&pid, 0.0);
+		iron.state = IRON_STATE_OFF;
+		iron.hibernate_timer = 0; // Reset the hibernate timer
+		return;
+	}
+
+	// If connected and enabled decide on state based on sleep pin and update PID accordingly
 	if(HAL_GPIO_ReadPin(SLEEP_A_GPIO_Port, SLEEP_A_Pin) == GPIO_PIN_SET)
 	{
-		new_state = IRON_STATE_SLEEP;
-		
-		if(new_state != prev_state)
+		// Check if hibernate delay has been reached
+		iron_state_t new_state = (iron.hibernate_timer >= iron.cfg.hibernate_delay) ? IRON_STATE_HIBERNATE : IRON_STATE_SLEEP;
+		// New setpoint depending on hibernate or sleep state
+		float new_setpoint = new_state == IRON_STATE_SLEEP ? (float) iron.cfg.sleep_temperature : 0.0;
+
+		if(new_state != iron.state)
 		{
-			PIDSetpointSet(&pid, iron.cfg.sleept_temperature);
+			PIDSetpointSet(&pid, new_setpoint);
 			iron.state = new_state;
 		}
+
+		// While in sleep state count the hibernate timer
+		if(iron.state == IRON_STATE_SLEEP)
+			iron.hibernate_timer++;
 
 	}
 	else
 	{
-		new_state = IRON_STATE_ACTIVE;
+		iron_state_t new_state = IRON_STATE_ACTIVE;
 		
-		if(new_state != prev_state)
+		if(new_state != iron.state)
 		{
-			PIDSetpointSet(&pid, iron.setpoint);
+			PIDSetpointSet(&pid, (float) iron.setpoint);
 			iron.state = new_state;
+			iron.hibernate_timer = 0; // Reset the hibernate timer
 		}
 	}
 }
@@ -203,8 +244,6 @@ void iron_timer_irq_handler()
 		half_cycle = half_cycle == 1 ? 0 : 1; // alternate between 0 and 1 to track half cycles
 		cycle += half_cycle; // increase cycle counter on every second half cycle
 
-		iron_update_status(); // Update iron status based on iron in stand and sleep timer
-
 		iron_sm_state = IRON_SM_STATE_ENABLE_AMPLIFIER; // Next state is to enable thermocouple amplifier
 		__HAL_TIM_SET_AUTORELOAD(&htim7, 100); //60us
 		HAL_TIM_Base_Start_IT(&htim7);
@@ -221,17 +260,20 @@ void iron_timer_irq_handler()
 		iron_calculate_temperature(iron_adc_read(&hadc1));
 		HAL_GPIO_WritePin(TCA_AMPLIFIER_EN_GPIO_Port, TCA_AMPLIFIER_EN_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+
+		iron_update_state(); // Update iron status based on iron in stand and sleep timer
+
 		pid.input = (float) temperature_smooth;
 		PIDCompute(&pid);
 		pid_out = pid.output;
-		power = pid_out == 0 ? 0xFFFF : 21-pid_out;
+		power = pid_out == 0 ? 0xFFFF : PID_OUT_GRANULARITY + 1 - pid_out;
 
 		iron_sm_state = IRON_SM_STATE_CONTROL_IRON; // Next we process ADC
 		__HAL_TIM_SET_AUTORELOAD(&htim7, 50); //10us
 		HAL_TIM_Base_Start_IT(&htim7);
 		break;
 	case IRON_SM_STATE_CONTROL_IRON:
-		if (iron.state != IRON_STATE_OFF) {
+		if (iron.state == IRON_STATE_ACTIVE || iron.state == IRON_STATE_SLEEP) {
 			if(cycle % power == 0)
 				HAL_GPIO_WritePin(HEATER_A_EN_GPIO_Port, HEATER_A_EN_Pin, GPIO_PIN_SET);
 		}

@@ -16,10 +16,12 @@
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    float sleept_temperature;
+    uint16_t sleep_temperature;
+    uint32_t hibernate_delay; /** Hibernate delay in number of halfwaves (10ms @ 50Hz or  8.33ms @ 60Hz) */
 } iron_config_t;
 
 typedef enum {
+    IRON_STATE_NOT_CONNECTED,
     IRON_STATE_OFF,
     IRON_STATE_HIBERNATE,
     IRON_STATE_SLEEP,
@@ -30,9 +32,11 @@ typedef enum {
 
 typedef struct {
     iron_config_t cfg;
-    float setpoint;
+    uint16_t setpoint;
     float temperature;
     iron_state_t state;
+    _Bool enabled;
+    uint32_t hibernate_timer; /** Hibernate timer counts up till it reaches cfg.hibernate_delay */
     // iron_state_change_cb_t state_change_cb;
 } iron_t;
 
@@ -58,6 +62,7 @@ uint16_t iron_get_temperature();
 uint16_t iron_get_setpoint();
 float iron_get_power();
 iron_state_t iron_get_state();
+uint32_t iron_get_seconds_till_hibernate();
 
 _Bool iron_is_enabled();
 _Bool iron_is_sleeping();
