@@ -74,7 +74,7 @@ static float pid_out;
 void iron_init()
 {
 	iron.cfg.sleep_temperature = 80;
-	iron.cfg.hibernate_delay = 6000; // 1 minute
+	iron.cfg.hibernate_delay = 12000; // 2 minutes
 
 	iron.setpoint = 200;
 	iron.state = IRON_STATE_NOT_CONNECTED;
