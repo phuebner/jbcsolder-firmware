@@ -18,7 +18,7 @@ project(solderiron-fw)
 enable_language(C CXX ASM)
 
 # Linker File     --- MUST EDIT ---
-set(MCU_LINKER_SCRIPT       ${PROJ_PATH}/Core/STM32F767VITX_FLASH.ld)
+set(MCU_LINKER_SCRIPT       ${PROJ_PATH}/STM32F767VITX_FLASH.ld)
 
 set(EXECUTABLE                      ${CMAKE_PROJECT_NAME})
 

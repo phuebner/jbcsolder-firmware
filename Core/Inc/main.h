@@ -29,7 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
-#include <stdint.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -95,6 +94,7 @@ void Error_Handler(void);
 #define ZERO_CROSS_Pin GPIO_PIN_1
 #define ZERO_CROSS_GPIO_Port GPIOE
 #define ZERO_CROSS_EXTI_IRQn EXTI1_IRQn
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -104,5 +104,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
