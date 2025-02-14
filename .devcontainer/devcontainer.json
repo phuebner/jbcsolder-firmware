@@ -1,0 +1,30 @@
+{
+	"name": "EmbeddedDevContainer",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"privileged": true,
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",
+				"marus25.cortex-debug",
+				"mcu-debug.debug-tracker-vscode",
+				"mcu-debug.memory-view",
+				"mcu-debug.rtos-views",
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-themes",
+				"cschlosser.doxdocgen",
+				"mhutchie.git-graph",
+				"donjayamanne.githistory",
+				"eamodio.gitlens",
+				"jeff-hykin.better-cpp-syntax",
+				"akiramiyakoda.cppincludeguard",
+				"dan-c-underwood.arm",
+				"bierner.markdown-preview-github-styles",
+				"zixuanwang.linkerscript"
+			]
+		}
+	}
+}
