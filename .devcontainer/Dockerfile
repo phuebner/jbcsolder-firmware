@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     cmake ninja-build \
     git gnupg2 \
     stlink-tools \
-    xz-utils curl
+    xz-utils curl \
+    usbutils && lsusb
 
 # Get ARM Toolchain
 RUN echo "Downloading ARM GNU GCC version ${ARM_VERSION}" \
@@ -27,5 +28,7 @@ RUN apt-get install -y \
     && pip install lizard cpplint --break-system-packages \
     && apt-get clean
 
+
+    
 # Add Toolchain to PATH
 ENV PATH="$PATH:${TOOLS_PATH}/bin"

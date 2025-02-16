@@ -24,7 +24,7 @@
     {
       "name": "ST-Link",
       "cwd": "${workspaceFolder}",
-      "executable": "${command:cmake.launchTargetPath}",
+      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "stlink",
@@ -34,7 +34,50 @@
       "device": "STM32L432KC", // MCU used [optional]
       "serialNumber": "", // Set ST-Link ID if you use multiple at the same time [optional]
       "runToEntryPoint": "main", // Run to main and stop there [optional]
-      "svdFile": "STM32_svd/STM32L4x2.svd" // SVD file to see registers [optional]
+      "svdFile": "${workspaceFolder}/STM32F767.svd" // SVD file to see registers [optional]
+    },
+    {
+      "name": "Debug Inside Docker - EmbeddedApplication",
+      "type": "cortex-debug",
+      "cwd": "${workspaceFolder}",
+      "request": "launch",
+      "device": "STM32F767VITX",
+      "svdFile": "${workspaceFolder}/STM32F767.svd",
+      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf",
+      "loadFiles": [
+        "${workspaceFolder}/build/Debug/solderiron-fw.elf"
+      ],
+      "servertype": "external",
+      "gdbTarget": "172.17.0.1:2000",
+      "postLaunchCommands": [
+        "monitor reset"
+      ],
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "raw",
+    },
+    {
+      "name": "Debug w/ ST-Link",
+      "cwd": "${workspaceFolder}",
+      "type": "cortex-debug",
+      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf", // Change to your .elf executable
+      "request": "launch",
+      "servertype": "stlink",
+      "device": "STM32F767VITX", // Change to your MCU used
+      "interface": "swd",
+      "serialNumber": "", // Set ST-Link ID if you use multiple at the same time
+      "runToEntryPoint": "main",
+      "svdFile": "${env:STM32CLT_PATH}/STMicroelectronics_CMSIS_SVD/STM32F767.svd", // Change based your MCU used
+      "v1": false, // Change it depending on ST Link version
+      "serverpath": "/opt/stm32cubeclt/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "stm32cubeprogrammer": "/opt/stm32cubeclt/STM32CubeProgrammer/bin",
+      "stlinkPath": "$/opt/stm32cubeclt/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      //"armToolchainPath": "$/opt/stm32cubeclt/GNU-tools-for-STM32/bin",
+      //"gdbPath": "$/opt/stm32cubeclt/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+      // "serverArgs": [
+      //   "-m",
+      //   "1",
+      // ],
+      //"preLaunchTask": "Build + Flash"
     }
   ]
 }

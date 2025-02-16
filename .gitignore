@@ -23,3 +23,5 @@ CubeMX/*
 !CubeMX/*.ioc
 docs/*
 docs/
+
+build.ninja
