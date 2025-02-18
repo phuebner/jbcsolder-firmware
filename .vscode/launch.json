@@ -2,7 +2,56 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "g++ build and debug active file",
+      "name": "Debug with STM32-Cube-CLT",
+      "cwd": "${workspaceFolder}",
+      "type": "cortex-debug",
+      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf", // Change to your .elf executable
+      "request": "launch",
+      "servertype": "stlink",
+      "device": "STM32F767VITX", // Change to your MCU used
+      "interface": "swd",
+      "serialNumber": "", // Set ST-Link ID if you use multiple at the same time
+      "runToEntryPoint": "main",
+      "svdFile": "${env:STM32CLT_PATH}/STMicroelectronics_CMSIS_SVD/STM32F767.svd", // Change based your MCU used
+      "v1": false, // Change it depending on ST Link version
+      "serverpath": "${env:STM32CLT_PATH}/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "stm32cubeprogrammer": "${env:STM32CLT_PATH}/STM32CubeProgrammer/bin",
+      "stlinkPath": "${env:STM32CLT_PATH}/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "armToolchainPath": "${env:STM32CLT_PATH}/GNU-tools-for-STM32/bin",
+      "gdbPath": "${env:STM32CLT_PATH}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+      // "serverArgs": [
+      //   "-m",
+      //   "1",
+      // ]
+      //"preLaunchTask": "Build + Flash"
+    },
+    {
+      "name": "Attach with STM32-Cube-CLT",
+      "cwd": "${workspaceFolder}",
+      "type": "cortex-debug",
+      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf", // Change to your .elf executable
+      // Let CMake extension decide executable: "${command:cmake.launchTargetPath}"
+      // Or fixed file path: "${workspaceFolder}/path/to/filename.elf"
+      "request": "attach",
+      "servertype": "stlink",
+      "device": "STM32F767VITX", // Change to your MCU used
+      "interface": "swd",
+      "serialNumber": "", // Set ST-Link ID if you use multiple at the same time
+      "runToEntryPoint": "main",
+      "svdFile": "${env:STM32CLT_PATH}/STMicroelectronics_CMSIS_SVD/STM32F767.svd", // Change based your MCU used
+      "v1": false, // Change it depending on ST Link version
+      "serverpath": "${env:STM32CLT_PATH}/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "stm32cubeprogrammer": "${env:STM32CLT_PATH}/STM32CubeProgrammer/bin",
+      "stlinkPath": "${env:STM32CLT_PATH}/STLink-gdb-server/bin/ST-LINK_gdbserver",
+      "armToolchainPath": "${env:STM32CLT_PATH}/GNU-tools-for-STM32/bin",
+      "gdbPath": "${env:STM32CLT_PATH}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+      // "serverArgs": [
+      //   "-m",
+      //   "1",
+      // ],
+    },
+    {
+      "name": "Run Simulation",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/bin/simulation",
@@ -21,63 +70,5 @@
       ],
       "preLaunchTask": "Build"
     },
-    {
-      "name": "ST-Link",
-      "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf",
-      "request": "launch",
-      "type": "cortex-debug",
-      "servertype": "stlink",
-      "interface": "swd",
-      "showDevDebugOutput": "both",
-      "v1": false, // ST-Link version
-      "device": "STM32L432KC", // MCU used [optional]
-      "serialNumber": "", // Set ST-Link ID if you use multiple at the same time [optional]
-      "runToEntryPoint": "main", // Run to main and stop there [optional]
-      "svdFile": "${workspaceFolder}/STM32F767.svd" // SVD file to see registers [optional]
-    },
-    {
-      "name": "Debug Inside Docker - EmbeddedApplication",
-      "type": "cortex-debug",
-      "cwd": "${workspaceFolder}",
-      "request": "launch",
-      "device": "STM32F767VITX",
-      "svdFile": "${workspaceFolder}/STM32F767.svd",
-      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf",
-      "loadFiles": [
-        "${workspaceFolder}/build/Debug/solderiron-fw.elf"
-      ],
-      "servertype": "external",
-      "gdbTarget": "172.17.0.1:2000",
-      "postLaunchCommands": [
-        "monitor reset"
-      ],
-      "runToEntryPoint": "main",
-      "showDevDebugOutput": "raw",
-    },
-    {
-      "name": "Debug w/ ST-Link",
-      "cwd": "${workspaceFolder}",
-      "type": "cortex-debug",
-      "executable": "${workspaceFolder}/build/Debug/solderiron-fw.elf", // Change to your .elf executable
-      "request": "launch",
-      "servertype": "stlink",
-      "device": "STM32F767VITX", // Change to your MCU used
-      "interface": "swd",
-      "serialNumber": "", // Set ST-Link ID if you use multiple at the same time
-      "runToEntryPoint": "main",
-      "svdFile": "${env:STM32CLT_PATH}/STMicroelectronics_CMSIS_SVD/STM32F767.svd", // Change based your MCU used
-      "v1": false, // Change it depending on ST Link version
-      "serverpath": "/opt/stm32cubeclt/STLink-gdb-server/bin/ST-LINK_gdbserver",
-      "stm32cubeprogrammer": "/opt/stm32cubeclt/STM32CubeProgrammer/bin",
-      "stlinkPath": "$/opt/stm32cubeclt/STLink-gdb-server/bin/ST-LINK_gdbserver",
-      //"armToolchainPath": "$/opt/stm32cubeclt/GNU-tools-for-STM32/bin",
-      //"gdbPath": "$/opt/stm32cubeclt/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
-      // "serverArgs": [
-      //   "-m",
-      //   "1",
-      // ],
-      //"preLaunchTask": "Build + Flash"
-    }
   ]
 }

@@ -289,5 +289,6 @@ void iron_zero_cross_irq_handler()
 {
 	iron_sm_state = IRON_SM_STATE_ZERO_CROSS; //Next state is the real zero crossing
 	__HAL_TIM_SET_AUTORELOAD(&htim7, 250); //300us
+	//HAL_TIM_OnePulse_Start_IT(&htim7, 0);
 	HAL_TIM_Base_Start_IT(&htim7);
 }

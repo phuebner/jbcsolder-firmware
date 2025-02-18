@@ -1,0 +1,1 @@
+.devcontainer/tools/st-stm32cubeclt_1.17.0_23554_20241124_1810_amd64.sh filter=lfs diff=lfs merge=lfs -text

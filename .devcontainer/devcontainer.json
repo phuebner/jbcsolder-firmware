@@ -14,8 +14,8 @@
 			"extensions": [
 				"twxs.cmake",
 				"ms-vscode.cmake-tools",
-				"marus25.cortex-debug",
 				"mcu-debug.debug-tracker-vscode",
+				"marus25.cortex-debug",
 				"mcu-debug.memory-view",
 				"mcu-debug.rtos-views",
 				"ms-vscode.cpptools",
@@ -31,5 +31,6 @@
 				"zixuanwang.linkerscript"
 			]
 		}
-	}
+	},
+	"remoteUser": "ubuntu"
 }
