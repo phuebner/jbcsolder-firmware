@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     xz-utils curl \
     usbutils vim \
     wget zip unzip tar \
+    libsdl2-2.0-0 libsdl2-dev \
+    gdb \
     sudo
 
 # Get ARM Toolchain

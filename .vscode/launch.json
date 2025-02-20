@@ -54,7 +54,7 @@
       "name": "Run Simulation",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/bin/simulation",
+      "program": "${workspaceFolder}/build/Simulator/solderiron-simulator",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -68,7 +68,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "Build"
+      "preLaunchTask": "Build Simulator"
     },
   ]
 }

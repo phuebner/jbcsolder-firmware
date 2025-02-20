@@ -62,8 +62,8 @@ int main(int argc, char **argv)
 
   // lv_my_widget();
   // lv_demo_widgets();
-//    lv_demo_printer();
-    gui_init();
+  //    lv_demo_printer();
+  gui_init();
 
   while (1)
   {
@@ -91,7 +91,7 @@ void lv_my_widget(void)
   // lv_obj_t *btn_lbl = lv_label_create(btn, NULL);
   // lv_label_set_text(btn_lbl, "Start");
 
-  uint8_t temperature = 300;
+  uint16_t temperature = 300;
   lv_obj_t *lbl_temperature = lv_label_create(lv_scr_act(), NULL);
   lv_obj_set_pos(lbl_temperature, 50, 50);
   lv_obj_add_style(lbl_temperature, LV_LABEL_PART_MAIN, &sty_current_temp);
