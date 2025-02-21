@@ -25,6 +25,8 @@ set(INCLUDE_DIRS_FIRMWARE
 
 set(INCLUDE_DIRS_SIMULATOR
     ${INCLUDE_DIRS_LVGL}
+    ${PROJ_PATH}/Core/Inc
+    ${PROJ_PATH}/Core/Src
     ${PROJ_PATH}/Core/Src/gui
     ${PROJ_PATH}/Simulator
 )

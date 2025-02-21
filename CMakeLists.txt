@@ -60,7 +60,7 @@ if(BUILD_SIMULATOR)
 	include_directories(${SDL2_INCLUDE_DIRS})
 	target_link_libraries(${EXECUTABLE} ${SDL2_LIBRARIES})
 
-	target_compile_definitions(${EXECUTABLE} PRIVATE "LV_LVGL_H_INCLUDE_SIMPLE")
+	target_compile_definitions(${EXECUTABLE} PUBLIC "LV_LVGL_H_INCLUDE_SIMPLE")
 	#target_link_libraries(${EXECUTABLE} PRIVATE SDL2)
     #target_link_libraries(${EXECUTABLE} SDL2) # Link SDL for the simulator
 else()

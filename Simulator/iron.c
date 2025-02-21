@@ -5,7 +5,7 @@
  *      Author: patrick
  */
 #include "main.h"
-#include "../Core/Src/iron.h"
+#include "iron.h"
 #include <stdbool.h>
 
 /* -------------------------------------------------------------------------- */
@@ -30,16 +30,13 @@ static uint16_t cycle = 0;
 
 static uint16_t power = 0xFFFF;
 
-
-
-
 /* -------------------------------------------------------------------------- */
 /*                              GLOBAL FUNCTIONS                              */
 /* -------------------------------------------------------------------------- */
 
 /**
  * @brief Init instance of soldering iron
- * 
+ *
  */
 void iron_init()
 {
@@ -47,14 +44,13 @@ void iron_init()
 
 	iron.setpoint = 200.0;
 	iron.state = IRON_STATE_OFF;
-
 }
 
 /* ---------------------------- Setter Functions ---------------------------- */
 
 void iron_set_setpoint(uint16_t temperature)
 {
-	iron.setpoint = (float) temperature;
+	iron.setpoint = (float)temperature;
 }
 
 void iron_set_enable(_Bool value)
@@ -71,7 +67,7 @@ uint16_t iron_get_temperature()
 
 uint16_t iron_get_setpoint()
 {
-	return (float) iron.setpoint;
+	return (float)iron.setpoint;
 }
 
 float iron_get_power()
@@ -99,14 +95,13 @@ _Bool iron_is_sleeping()
 	return sleep_iron_a;
 }
 
-
 /* -------------------------------------------------------------------------- */
 /*                             INTERRUPT HANDLERS                             */
 /* -------------------------------------------------------------------------- */
 
 /**
  * @brief Iron state machine based on timer interrupt
- * 
+ *
  */
 void iron_timer_irq_handler()
 {

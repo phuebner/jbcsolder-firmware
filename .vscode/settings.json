@@ -3,6 +3,10 @@
     "cortex-debug.variableUseNaturalFormat": true,
     "files.associations": {
         "mouse.h": "c",
-        "main_screen.h": "c"
+        "main_screen.h": "c",
+        "hal_lvgl_encoder.h": "c",
+        "stdbool.h": "c",
+        "iron.h": "c",
+        "main.h": "c"
     }
 }

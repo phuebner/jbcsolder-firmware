@@ -8,19 +8,20 @@
 #ifndef SRC_IRON_H_
 #define SRC_IRON_H_
 
-#include "main.h"
 #include "pid.h"
 
 /* -------------------------------------------------------------------------- */
 /*                              TYPE DEFINITIONS                              */
 /* -------------------------------------------------------------------------- */
 
-typedef struct {
+typedef struct
+{
     uint16_t sleep_temperature;
     uint32_t hibernate_delay; /** Hibernate delay in number of halfwaves (10ms @ 50Hz or  8.33ms @ 60Hz) */
 } iron_config_t;
 
-typedef enum {
+typedef enum
+{
     IRON_STATE_NOT_CONNECTED,
     IRON_STATE_OFF,
     IRON_STATE_HIBERNATE,
@@ -30,7 +31,8 @@ typedef enum {
 
 // typedef void (*iron_state_change_cb_t)(const iron_state_t state);
 
-typedef struct {
+typedef struct
+{
     iron_config_t cfg;
     uint16_t setpoint;
     float temperature;
@@ -45,8 +47,8 @@ typedef struct {
 /* -------------------------------------------------------------------------- */
 
 /**
- * @brief Init instance of soldering iron 
- * 
+ * @brief Init instance of soldering iron
+ *
  */
 void iron_init();
 
