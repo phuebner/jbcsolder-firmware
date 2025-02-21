@@ -8,7 +8,7 @@
 #ifndef SRC_HAL_LVGL_ENCODER_H_
 #define SRC_HAL_LVGL_ENCODER_H_
 
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 void hal_lvgl_encoder_init();
 

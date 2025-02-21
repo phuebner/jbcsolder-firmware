@@ -1,14 +1,14 @@
 
 /**
  * @file disp.c
- * 
+ *
  */
 
 /*********************
  *      INCLUDES
  *********************/
 #include "lv_conf.h"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include <string.h>
 
 #include "lcd.h"
@@ -22,10 +22,10 @@
 /* DMA Stream parameters definitions. You can modify these parameters to select
    a different DMA Stream and/or channel.
    But note that only DMA2 Streams are capable of Memory to Memory transfers. */
-//#define DMA_STREAM               DMA2_Stream0
-//#define DMA_CHANNEL              DMA_CHANNEL_0
-//#define DMA_STREAM_IRQ           DMA2_Stream0_IRQn
-//#define DMA_STREAM_IRQHANDLER    DMA2_Stream0_IRQHandler
+// #define DMA_STREAM               DMA2_Stream0
+// #define DMA_CHANNEL              DMA_CHANNEL_0
+// #define DMA_STREAM_IRQ           DMA2_Stream0_IRQn
+// #define DMA_STREAM_IRQHANDLER    DMA2_Stream0_IRQHandler
 
 /**********************
  *      TYPEDEFS
@@ -36,43 +36,42 @@
  **********************/
 
 /*These 3 functions are needed by LittlevGL*/
-static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_p);
-//#if LV_USE_GPU
-//static void gpu_mem_blend(lv_disp_drv_t *disp_drv, lv_color_t * dest, const lv_color_t * src, uint32_t length, lv_opa_t opa);
-//static void gpu_mem_fill(lv_disp_drv_t *disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width, const lv_area_t * fill_area, lv_color_t color);
-//#endif
+static void tft_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_p);
+// #if LV_USE_GPU
+// static void gpu_mem_blend(lv_disp_drv_t *disp_drv, lv_color_t * dest, const lv_color_t * src, uint32_t length, lv_opa_t opa);
+// static void gpu_mem_fill(lv_disp_drv_t *disp_drv, lv_color_t * dest_buf, lv_coord_t dest_width, const lv_area_t * fill_area, lv_color_t color);
+// #endif
 
 /*LCD*/
-//static void LCD_Config(void);
+// static void LCD_Config(void);
 
-//#if LV_USE_GPU
-//static void DMA2D_Config(void);
-//#endif
+// #if LV_USE_GPU
+// static void DMA2D_Config(void);
+// #endif
 
 /*DMA to flush to frame buffer*/
-//static void DMA_Config(void);
-//static void DMA_TransferComplete(DMA_HandleTypeDef *han);
-//static void DMA_TransferError(DMA_HandleTypeDef *han);
+// static void DMA_Config(void);
+// static void DMA_TransferComplete(DMA_HandleTypeDef *han);
+// static void DMA_TransferError(DMA_HandleTypeDef *han);
 
 static void Error_Handler(void);
 /**********************
  *  STATIC VARIABLES
  **********************/
-//#if LV_USE_GPU
-//static DMA2D_HandleTypeDef Dma2dHandle;
-//#endif
+// #if LV_USE_GPU
+// static DMA2D_HandleTypeDef Dma2dHandle;
+// #endif
 
-//static uint16_t my_fb[DISP_HOR * DISP_VER];
+// static uint16_t my_fb[DISP_HOR * DISP_VER];
 
-
-DMA_HandleTypeDef     DmaHandle;
+DMA_HandleTypeDef DmaHandle;
 static lv_disp_drv_t disp_drv;
 static int32_t x1_flush;
 static int32_t y1_flush;
 static int32_t x2_flush;
 static int32_t y2_fill;
 static int32_t y_fill_act;
-static const lv_color_t * buf_to_flush;
+static const lv_color_t *buf_to_flush;
 
 /**********************
  *      MACROS
@@ -83,7 +82,7 @@ static const lv_color_t * buf_to_flush;
  **********************/
 
 static volatile uint32_t t_saved = 0;
-void monitor_cb(lv_disp_drv_t * d, uint32_t t, uint32_t p)
+void monitor_cb(lv_disp_drv_t *d, uint32_t t, uint32_t p)
 {
 	t_saved = t;
 }
@@ -95,13 +94,13 @@ void tft_init(void)
 {
 	/* LittlevGL requires a buffer where it draws the objects. The buffer's has to be greater than 1 display row*/
 	static lv_disp_buf_t disp_buf_1;
-	static lv_color_t buf1_1[LV_HOR_RES_MAX * LV_VER_RES_MAX/2];
-//	static lv_color_t buf1_2[LV_HOR_RES_MAX * 68];
-	lv_disp_buf_init(&disp_buf_1, buf1_1, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX/2);   /*Initialize the display buffer*/
+	static lv_color_t buf1_1[LV_HOR_RES_MAX * LV_VER_RES_MAX / 2];
+	//	static lv_color_t buf1_2[LV_HOR_RES_MAX * 68];
+	lv_disp_buf_init(&disp_buf_1, buf1_1, NULL, LV_HOR_RES_MAX * LV_VER_RES_MAX / 2); /*Initialize the display buffer*/
 
 	lv_disp_drv_init(&disp_drv);
 
-//	DMA_Config();
+	//	DMA_Config();
 	/*Set a display buffer*/
 	disp_drv.buffer = &disp_buf_1;
 	/*Set the resolution of the display*/
@@ -116,17 +115,18 @@ void tft_init(void)
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-static void tft_flush_complete_callback(){
-//	y_fill_act ++;
-//	if(y_fill_act > y2_fill) {
-    	SCB_CleanInvalidateDCache();
-    	SCB_InvalidateICache();
-		lv_disp_flush_ready(&disp_drv);
-//	} else {
-//    	uint32_t length = (x2_flush - x1_flush + 1);
-//        buf_to_flush += x2_flush - x1_flush + 1;
-//        display_bitmap(x1_flush, y1_flush, x2_flush, y2_fill, (uint16_t*) buf_to_flush, tft_flush_complete_callback);
-//	}
+static void tft_flush_complete_callback()
+{
+	//	y_fill_act ++;
+	//	if(y_fill_act > y2_fill) {
+	SCB_CleanInvalidateDCache();
+	SCB_InvalidateICache();
+	lv_disp_flush_ready(&disp_drv);
+	//	} else {
+	//    	uint32_t length = (x2_flush - x1_flush + 1);
+	//        buf_to_flush += x2_flush - x1_flush + 1;
+	//        display_bitmap(x1_flush, y1_flush, x2_flush, y2_fill, (uint16_t*) buf_to_flush, tft_flush_complete_callback);
+	//	}
 }
 
 /**
@@ -137,13 +137,17 @@ static void tft_flush_complete_callback(){
  * @param y2 bottom coordinate of the rectangle
  * @param color_p pointer to an array of colors
  */
-static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_p)
+static void tft_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_p)
 {
 	/*Return if the area is out the screen*/
-	if(area->x2 < 0) return;
-	if(area->y2 < 0) return;
-	if(area->x1 > DISP_HOR - 1) return;
-	if(area->y1 > DISP_VER - 1) return;
+	if (area->x2 < 0)
+		return;
+	if (area->y2 < 0)
+		return;
+	if (area->x1 > DISP_HOR - 1)
+		return;
+	if (area->y1 > DISP_VER - 1)
+		return;
 
 	/*Truncate the area to the screen*/
 	int32_t act_x1 = area->x1 < 0 ? 0 : area->x1;
@@ -161,41 +165,39 @@ static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * 
 	SCB_CleanInvalidateDCache();
 	SCB_InvalidateICache();
 
-	display_bitmap(x1_flush, y1_flush, x2_flush, y2_fill, (uint16_t*) buf_to_flush, tft_flush_complete_callback);
-//	HAL_Delay(100);
-//	lv_disp_flush_ready(&disp_drv);
-	  /*##-7- Start the DMA transfer using the interrupt mode #*/
-	  /* Configure the source, destination and buffer size DMA fields and Start DMA Stream transfer */
-	  /* Enable All the DMA interrupts */
-//	HAL_StatusTypeDef err;
-//	err = HAL_DMA_Start_IT(&DmaHandle,(uint32_t)buf_to_flush, (uint32_t)&my_fb[y_fill_act * TFT_HOR_RES + x1_flush],
-//			  (x2_flush - x1_flush + 1));
-//	if(err != HAL_OK)
-//	{
-//		while(1);	/*Halt on error*/
-//	}
+	display_bitmap(x1_flush, y1_flush, x2_flush, y2_fill, (uint16_t *)buf_to_flush, tft_flush_complete_callback);
+	//	HAL_Delay(100);
+	//	lv_disp_flush_ready(&disp_drv);
+	/*##-7- Start the DMA transfer using the interrupt mode #*/
+	/* Configure the source, destination and buffer size DMA fields and Start DMA Stream transfer */
+	/* Enable All the DMA interrupts */
+	//	HAL_StatusTypeDef err;
+	//	err = HAL_DMA_Start_IT(&DmaHandle,(uint32_t)buf_to_flush, (uint32_t)&my_fb[y_fill_act * TFT_HOR_RES + x1_flush],
+	//			  (x2_flush - x1_flush + 1));
+	//	if(err != HAL_OK)
+	//	{
+	//		while(1);	/*Halt on error*/
+	//	}
 }
 
-
-
 /**
-  * @brief DMA2D MSP Initialization
-  *        This function configures the hardware resources used in this example:
-  *           - Peripheral's clock enable
-  *           - Peripheral's GPIO Configuration
-  * @param hdma2d: DMA2D handle pointer
-  * @retval None
-  */
-//void HAL_DMA2D_MspInit(DMA2D_HandleTypeDef *hdma2d)
+ * @brief DMA2D MSP Initialization
+ *        This function configures the hardware resources used in this example:
+ *           - Peripheral's clock enable
+ *           - Peripheral's GPIO Configuration
+ * @param hdma2d: DMA2D handle pointer
+ * @retval None
+ */
+// void HAL_DMA2D_MspInit(DMA2D_HandleTypeDef *hdma2d)
 //{
-//  /*##-1- Enable peripherals and GPIO Clocks #################################*/
-//  __HAL_RCC_DMA2D_CLK_ENABLE();
+//   /*##-1- Enable peripherals and GPIO Clocks #################################*/
+//   __HAL_RCC_DMA2D_CLK_ENABLE();
 //
-//  /*##-2- NVIC configuration  ################################################*/
-//  /* NVIC configuration for DMA2D transfer complete interrupt */
-//  HAL_NVIC_SetPriority(DMA2D_IRQn, 0, 0);
-//  HAL_NVIC_EnableIRQ(DMA2D_IRQn);
-//}
+//   /*##-2- NVIC configuration  ################################################*/
+//   /* NVIC configuration for DMA2D transfer complete interrupt */
+//   HAL_NVIC_SetPriority(DMA2D_IRQn, 0, 0);
+//   HAL_NVIC_EnableIRQ(DMA2D_IRQn);
+// }
 
 /**
   * @brief  Configure the DMA controller according to the Stream parameters
@@ -205,48 +207,48 @@ static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * 
   *        -2- Select the DMA functional Parameters
   *        -3- Select the DMA instance to be used for the transfer
   *        -4- Select Callbacks functions called after Transfer complete and
-               Transfer error interrupt detection
+			   Transfer error interrupt detection
   *        -5- Initialize the DMA stream
   *        -6- Configure NVIC for DMA transfer complete/error interrupts
   * @param  None
   * @retval None
   */
-//static void DMA_Config(void)
+// static void DMA_Config(void)
 //{
-//  /*## -1- Enable DMA2 clock #################################################*/
-//  __HAL_RCC_DMA2_CLK_ENABLE();
+//   /*## -1- Enable DMA2 clock #################################################*/
+//   __HAL_RCC_DMA2_CLK_ENABLE();
 //
-//  /*##-2- Select the DMA functional Parameters ###############################*/
-//  DmaHandle.Init.Channel = DMA_CHANNEL;                     /* DMA_CHANNEL_0                    */
-//  DmaHandle.Init.Direction = DMA_MEMORY_TO_MEMORY;          /* M2M transfer mode                */
-//  DmaHandle.Init.PeriphInc = DMA_PINC_ENABLE;               /* Peripheral increment mode Enable */
-//  DmaHandle.Init.MemInc = DMA_MINC_ENABLE;                  /* Memory increment mode Enable     */
-//  DmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD; /* Peripheral data alignment : 16bit */
-//  DmaHandle.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;    /* memory data alignment : 16bit     */
-//  DmaHandle.Init.Mode = DMA_NORMAL;                         /* Normal DMA mode                  */
-//  DmaHandle.Init.Priority = DMA_PRIORITY_HIGH;              /* priority level : high            */
-//  DmaHandle.Init.FIFOMode = DMA_FIFOMODE_ENABLE;            /* FIFO mode enabled                */
-//  DmaHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL; /* FIFO threshold: 1/4 full   */
-//  DmaHandle.Init.MemBurst = DMA_MBURST_SINGLE;              /* Memory burst                     */
-//  DmaHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;           /* Peripheral burst                 */
+//   /*##-2- Select the DMA functional Parameters ###############################*/
+//   DmaHandle.Init.Channel = DMA_CHANNEL;                     /* DMA_CHANNEL_0                    */
+//   DmaHandle.Init.Direction = DMA_MEMORY_TO_MEMORY;          /* M2M transfer mode                */
+//   DmaHandle.Init.PeriphInc = DMA_PINC_ENABLE;               /* Peripheral increment mode Enable */
+//   DmaHandle.Init.MemInc = DMA_MINC_ENABLE;                  /* Memory increment mode Enable     */
+//   DmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD; /* Peripheral data alignment : 16bit */
+//   DmaHandle.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;    /* memory data alignment : 16bit     */
+//   DmaHandle.Init.Mode = DMA_NORMAL;                         /* Normal DMA mode                  */
+//   DmaHandle.Init.Priority = DMA_PRIORITY_HIGH;              /* priority level : high            */
+//   DmaHandle.Init.FIFOMode = DMA_FIFOMODE_ENABLE;            /* FIFO mode enabled                */
+//   DmaHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL; /* FIFO threshold: 1/4 full   */
+//   DmaHandle.Init.MemBurst = DMA_MBURST_SINGLE;              /* Memory burst                     */
+//   DmaHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;           /* Peripheral burst                 */
 //
-//  /*##-3- Select the DMA instance to be used for the transfer : DMA2_Stream0 #*/
-//  DmaHandle.Instance = DMA_STREAM;
+//   /*##-3- Select the DMA instance to be used for the transfer : DMA2_Stream0 #*/
+//   DmaHandle.Instance = DMA_STREAM;
 //
-//  /*##-4- Initialize the DMA stream ##########################################*/
-//  if(HAL_DMA_Init(&DmaHandle) != HAL_OK)
-//  {
-//    while(1);
-//  }
+//   /*##-4- Initialize the DMA stream ##########################################*/
+//   if(HAL_DMA_Init(&DmaHandle) != HAL_OK)
+//   {
+//     while(1);
+//   }
 //
-//  /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
-//  HAL_DMA_RegisterCallback(&DmaHandle, HAL_DMA_XFER_CPLT_CB_ID, DMA_TransferComplete);
-//  HAL_DMA_RegisterCallback(&DmaHandle, HAL_DMA_XFER_ERROR_CB_ID, DMA_TransferError);
+//   /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
+//   HAL_DMA_RegisterCallback(&DmaHandle, HAL_DMA_XFER_CPLT_CB_ID, DMA_TransferComplete);
+//   HAL_DMA_RegisterCallback(&DmaHandle, HAL_DMA_XFER_ERROR_CB_ID, DMA_TransferError);
 //
-//  /*##-6- Configure NVIC for DMA transfer complete/error interrupts ##########*/
-//  HAL_NVIC_SetPriority(DMA_STREAM_IRQ, 0, 0);
-//  HAL_NVIC_EnableIRQ(DMA_STREAM_IRQ);
-//}
+//   /*##-6- Configure NVIC for DMA transfer complete/error interrupts ##########*/
+//   HAL_NVIC_SetPriority(DMA_STREAM_IRQ, 0, 0);
+//   HAL_NVIC_EnableIRQ(DMA_STREAM_IRQ);
+// }
 //
 ///**
 //  * @brief  DMA conversion complete callback
@@ -254,7 +256,7 @@ static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * 
 //  *         is generated
 //  * @retval None
 //  */
-//static void DMA_TransferComplete(DMA_HandleTypeDef *han)
+// static void DMA_TransferComplete(DMA_HandleTypeDef *han)
 //{
 //	y_fill_act ++;
 //
@@ -279,7 +281,7 @@ static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * 
 //  *         is generated during DMA transfer
 //  * @retval None
 //  */
-//static void DMA_TransferError(DMA_HandleTypeDef *han)
+// static void DMA_TransferError(DMA_HandleTypeDef *han)
 //{
 //
 //}
@@ -291,21 +293,20 @@ static void tft_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * 
 //  * @param  None
 //  * @retval None
 //  */
-//void DMA_STREAM_IRQHANDLER(void)
+// void DMA_STREAM_IRQHANDLER(void)
 //{
 //    /* Check the interrupt and clear flag */
 //    HAL_DMA_IRQHandler(&DmaHandle);
 //}
 
-
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @param  None
+ * @retval None
+ */
 static void Error_Handler(void)
 {
-  while(1)
-  {
-  }
+	while (1)
+	{
+	}
 }

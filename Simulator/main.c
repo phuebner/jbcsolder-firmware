@@ -13,7 +13,7 @@
 #define SDL_MAIN_HANDLED /*To fix SDL's "undefined reference to WinMain" \
                             issue*/
 #include <SDL2/SDL.h>
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "lv_drivers/display/monitor.h"
 #include "lv_drivers/indev/mouse.h"
 #include "../Core/Src/gui/main_screen.h"
@@ -30,6 +30,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
+void create_styles(void);
 static void hal_init(void);
 static int tick_thread(void *data);
 static void memory_monitor(lv_task_t *param);

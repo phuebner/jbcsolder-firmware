@@ -23,7 +23,7 @@
 #include "stm32f7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "drv/ft6236u/ft6236u.h"
 #include "iron.h"
 /* USER CODE END Includes */

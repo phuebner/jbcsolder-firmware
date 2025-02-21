@@ -12,8 +12,8 @@ set(INCLUIDE_DIRS_STM32_DRIVERS
 
 ### INCLUDE DIRECTORIES LVGL
 set(INCLUDE_DIRS_LVGL
-    ${PROJ_PATH}/Drivers
     ${PROJ_PATH}/Drivers/lvgl
+    ${PROJ_PATH}/Drivers/lvgl/src/lv_misc
 )
 
 set(INCLUDE_DIRS_FIRMWARE

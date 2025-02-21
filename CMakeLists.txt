@@ -45,12 +45,24 @@ if(BUILD_SIMULATOR)
 	add_executable(${EXECUTABLE} ${SIMULATOR_SOURCES})
 	target_include_directories(${EXECUTABLE} PRIVATE ${INCLUDE_DIRS_SIMULATOR})
 
-	target_compile_options(${EXECUTABLE} PRIVATE -Wall -Wextra -Wshadow -Wundef -Wmaybe-uninitialized -Wmissing-prototypes -Wno-discarded-qualifiers 
+	target_compile_options(${EXECUTABLE} PRIVATE -O0 -g -Wall -Wextra -Wshadow -Wundef -Wmaybe-uninitialized -Wmissing-prototypes -Wno-discarded-qualifiers 
 	-Wno-unused-function -Wno-error=strict-prototypes -Wpointer-arith -fno-strict-aliasing -Wno-error=cpp -Wuninitialized 
 	-Wno-unused-parameter -Wno-missing-field-initializers -Wno-format-nonliteral -Wno-cast-qual -Wunreachable-code -Wno-switch-default 
 	-Wreturn-type -Wmultichar -Wformat-security -Wno-ignored-qualifiers -Wno-error=pedantic -Wno-sign-compare -Wno-error=missing-prototypes -Wdouble-promotion -Wclobbered -Wdeprecated 
-	-Wempty-body -Wshift-negative-value -Wstack-usage=2048)
-    target_link_libraries(${EXECUTABLE} SDL2) # Link SDL for the simulator
+	-Wempty-body -Wshift-negative-value -Wstack-usage=2048 -Wtype-limits -Wsizeof-pointer-memaccess -Wpointer-arith)
+
+	# target_compile_definitions(${EXECUTABLE} PRIVATE "SIMULATOR=1")
+	# Linker options
+	target_link_options(${EXECUTABLE} PRIVATE
+		-lm
+	)
+	find_package(SDL2 REQUIRED SDL2)
+	include_directories(${SDL2_INCLUDE_DIRS})
+	target_link_libraries(${EXECUTABLE} ${SDL2_LIBRARIES})
+
+	target_compile_definitions(${EXECUTABLE} PRIVATE "LV_LVGL_H_INCLUDE_SIMPLE")
+	#target_link_libraries(${EXECUTABLE} PRIVATE SDL2)
+    #target_link_libraries(${EXECUTABLE} SDL2) # Link SDL for the simulator
 else()
 	set(EXECUTABLE		${CMAKE_PROJECT_NAME}-fw)
 	# Linker File     --- MUST EDIT ---
@@ -63,7 +75,7 @@ else()
 	target_include_directories(${EXECUTABLE} PRIVATE ${INCLUDE_DIRS_FIRMWARE})
 
 	# Project symbols
-	target_compile_definitions(${EXECUTABLE} PRIVATE ${compiler_define})
+	target_compile_definitions(${EXECUTABLE} PRIVATE ${compiler_define} "LV_LVGL_H_INCLUDE_SIMPLE")
 
 	# Compiler options
 	set(WARNINGS
