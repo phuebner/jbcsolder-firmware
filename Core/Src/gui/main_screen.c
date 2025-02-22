@@ -19,9 +19,6 @@
 #define SETPOINT_STEP_SIZE 5
 #define ANIMATION_TIME 200
 
-#define BOX_SETPOINT_POS_ACTIVE 35
-#define BOX_SETPOINT_POS_SLEEP 70
-
 /* --------------------------------- Colors --------------------------------- */
 #define COLOR_BG_TITLEBAR lv_color_hex(0xA00101)	  // dark red
 #define COLOR_BG_PRESET_DRAWER lv_color_hex(0x4D4D4D) // dark grey
@@ -61,7 +58,6 @@ static lv_obj_t *scr_home;
 
 static lv_obj_t *box_titlebar;
 static lv_obj_t *box_presets;
-static lv_obj_t *box_main;
 static lv_obj_t *box_temperature;
 static lv_obj_t *box_setpoint;
 static lv_obj_t *box_sleep;
@@ -80,6 +76,19 @@ static lv_obj_t *lbl_iron_state_msg1;
 static lv_obj_t *lbl_iron_state_msg2;
 
 static lv_group_t *g;
+
+/* Sizes */
+static const lv_coord_t TITLEBAR_HEIGHT = 35;
+static const lv_coord_t TITLEBAR_BUTTON_HEIGHT = 55;
+
+static const lv_coord_t DRAWER_WIDTH = 65;
+static const lv_coord_t DRAWER_PADDING_VER = 14;
+
+static const lv_coord_t POWER_BAR_WIDTH = 15;
+static const lv_coord_t POWER_BAR_PADDING_HOR = 10;
+static const lv_coord_t POWER_BAR_PADDING_VER = 14;
+
+static const lv_coord_t CENTER_AREA_WIDTH = (LV_HOR_RES_MAX - POWER_BAR_PADDING_HOR - POWER_BAR_WIDTH - DRAWER_WIDTH);
 
 /* -------------------------------------------------------------------------- */
 /*                              PUBLIC FUNCTIONS                              */
@@ -164,17 +173,20 @@ static void setup_titlebar(void)
 
 static void setup_preset_drawer(void)
 {
-	const lv_coord_t X_HIDDEN = 30; /** Hidden portion of preset drawer to hide round corners */
+	const lv_coord_t DRAWER_HEIGHT = (LV_VER_RES_MAX - (2 * DRAWER_PADDING_VER));
 
-	/* Preset drawer background */
+	/* Preset drawer create and apply style */
 	box_presets = lv_obj_create(lv_scr_act(), NULL);
 	lv_theme_apply(box_presets, (lv_theme_style_t)CUSTOM_THEME_PRESET_DRAWER);
-	lv_obj_set_size(box_presets, PRESET_DRAWER_WIDTH + X_HIDDEN, PRESET_DRAWER_HEIGHT);
-	lv_obj_align(box_presets, NULL, LV_ALIGN_IN_RIGHT_MID, X_HIDDEN, 0);
 
-	/* Object mask to mask round corner of buttons */
+	/* Set size and position */
+	const lv_coord_t CORNER_RADIUS = lv_obj_get_style_radius(box_presets, LV_OBJ_PART_MAIN);
+	lv_obj_set_size(box_presets, DRAWER_WIDTH + CORNER_RADIUS, DRAWER_HEIGHT); // Add corner radius to width to hide right corner
+	lv_obj_align(box_presets, NULL, LV_ALIGN_IN_RIGHT_MID, CORNER_RADIUS, 0);
+
+	/* Create round corners using object mask */
 	lv_obj_t *om = lv_objmask_create(box_presets, NULL);
-	lv_obj_set_size(om, PRESET_DRAWER_WIDTH + X_HIDDEN, PRESET_DRAWER_HEIGHT);
+	lv_obj_set_size(om, DRAWER_WIDTH + CORNER_RADIUS, DRAWER_HEIGHT); // Add corner radius to width to hide right corner
 	lv_obj_align(om, NULL, LV_ALIGN_IN_LEFT_MID, 0, 0);
 
 	lv_area_t mask_rect;
@@ -183,19 +195,19 @@ static void setup_preset_drawer(void)
 
 	mask_rect.x1 = 0;
 	mask_rect.y1 = 0;
-	mask_rect.x2 = PRESET_DRAWER_WIDTH + X_HIDDEN;
-	mask_rect.y2 = PRESET_DRAWER_HEIGHT;
-	mask_radius = (lv_coord_t)lv_obj_get_style_radius(box_presets, LV_OBJ_PART_MAIN);
-	lv_draw_mask_radius_init(&mask_param, &mask_rect, mask_radius, false);
+	mask_rect.x2 = DRAWER_WIDTH + CORNER_RADIUS;
+	mask_rect.y2 = DRAWER_HEIGHT;
+	// mask_radius = (lv_coord_t)lv_obj_get_style_radius(box_presets, LV_OBJ_PART_MAIN);
+	lv_draw_mask_radius_init(&mask_param, &mask_rect, CORNER_RADIUS, false);
 	lv_objmask_add_mask(om, &mask_param);
 
 	/* Preset button 1*/
-	const lv_coord_t PRESET_BUTTON_HEIGHT = PRESET_DRAWER_HEIGHT / 3;
+	const lv_coord_t PRESET_BUTTON_HEIGHT = DRAWER_HEIGHT / 3;
 
 	btn_quick1 = lv_btn_create(om, NULL);
 	lv_theme_apply(btn_quick1, (lv_theme_style_t)CUSTOM_THEME_PRESET_BTN);
-	lv_obj_set_size(btn_quick1, PRESET_DRAWER_WIDTH, PRESET_BUTTON_HEIGHT);
-	lv_obj_align(btn_quick1, NULL, LV_ALIGN_CENTER, -(X_HIDDEN / 2), -(PRESET_BUTTON_HEIGHT));
+	lv_obj_set_size(btn_quick1, DRAWER_WIDTH, PRESET_BUTTON_HEIGHT);
+	lv_obj_align(btn_quick1, NULL, LV_ALIGN_IN_LEFT_MID, 0, -(PRESET_BUTTON_HEIGHT));
 
 	lv_obj_t *lbl_btn_quick1 = lv_label_create(btn_quick1, NULL);
 	lv_label_set_text(lbl_btn_quick1, "350");
@@ -204,8 +216,8 @@ static void setup_preset_drawer(void)
 	/* Preset button 2*/
 	btn_quick2 = lv_btn_create(om, NULL);
 	lv_theme_apply(btn_quick2, (lv_theme_style_t)CUSTOM_THEME_PRESET_BTN);
-	lv_obj_set_size(btn_quick2, PRESET_DRAWER_WIDTH, PRESET_BUTTON_HEIGHT);
-	lv_obj_align(btn_quick2, NULL, LV_ALIGN_CENTER, -(X_HIDDEN / 2), 0);
+	lv_obj_set_size(btn_quick2, DRAWER_WIDTH, PRESET_BUTTON_HEIGHT);
+	lv_obj_align(btn_quick2, NULL, LV_ALIGN_IN_LEFT_MID, 0, 0);
 
 	lv_obj_t *lbl_btn_quick2 = lv_label_create(btn_quick2, NULL);
 	lv_label_set_text(lbl_btn_quick2, "300");
@@ -214,25 +226,27 @@ static void setup_preset_drawer(void)
 	/* Preset button 3 */
 	btn_quick3 = lv_btn_create(om, NULL);
 	lv_theme_apply(btn_quick3, (lv_theme_style_t)CUSTOM_THEME_PRESET_BTN);
-	lv_obj_set_size(btn_quick3, PRESET_DRAWER_WIDTH, PRESET_BUTTON_HEIGHT);
-	lv_obj_align(btn_quick3, NULL, LV_ALIGN_CENTER, -(X_HIDDEN / 2), PRESET_BUTTON_HEIGHT);
+	lv_obj_set_size(btn_quick3, DRAWER_WIDTH, PRESET_BUTTON_HEIGHT);
+	lv_obj_align(btn_quick3, NULL, LV_ALIGN_IN_LEFT_MID, 0, PRESET_BUTTON_HEIGHT);
 
 	lv_obj_t *lbl_btn_quick3 = lv_label_create(btn_quick3, NULL);
 	lv_label_set_text(lbl_btn_quick3, "250");
 	lv_obj_set_event_cb(btn_quick3, btn_quick_event_cb);
 
 	/* Separators */
-	static lv_point_t line_points[] = {{0, 0}, {PRESET_DRAWER_WIDTH - 10, 0}};
+	const lv_coord_t SEPARATOR_WIDTH = DRAWER_WIDTH - CORNER_RADIUS;
+	static lv_point_t line_points[] = {{0, 0}, {0, 0}}; // Must be static because otherwise line will not be drawn
+	line_points[1].x = SEPARATOR_WIDTH;					// Must be set after line_points[0] is set because of static initialization
 
 	lv_obj_t *line1 = lv_line_create(om, NULL);
 	lv_line_set_points(line1, line_points, 2);
 	lv_theme_apply(line1, (lv_theme_style_t)CUSTOM_THEME_PRESET_SEPARATOR);
-	lv_obj_align(line1, NULL, LV_ALIGN_CENTER, -(X_HIDDEN / 2), -(PRESET_BUTTON_HEIGHT / 2));
+	lv_obj_align(line1, NULL, LV_ALIGN_IN_LEFT_MID, (CORNER_RADIUS / 2), -(PRESET_BUTTON_HEIGHT / 2));
 
 	lv_obj_t *line2 = lv_line_create(om, NULL);
 	lv_line_set_points(line2, line_points, 2);
 	lv_theme_apply(line2, (lv_theme_style_t)CUSTOM_THEME_PRESET_SEPARATOR);
-	lv_obj_align(line2, NULL, LV_ALIGN_CENTER, -(X_HIDDEN / 2), (PRESET_BUTTON_HEIGHT / 2));
+	lv_obj_align(line2, NULL, LV_ALIGN_IN_LEFT_MID, (CORNER_RADIUS / 2), (PRESET_BUTTON_HEIGHT / 2));
 
 	/* Animate in */
 	lv_anim_t a;
@@ -241,7 +255,7 @@ static void setup_preset_drawer(void)
 	lv_anim_set_time(&a, ANIMATION_TIME);
 	lv_anim_set_delay(&a, 300);
 	lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)lv_obj_set_x);
-	lv_anim_set_values(&a, lv_obj_get_x(box_presets) + PRESET_DRAWER_WIDTH,
+	lv_anim_set_values(&a, lv_obj_get_x(box_presets) + DRAWER_WIDTH,
 					   lv_obj_get_x(box_presets));
 	lv_anim_start(&a);
 
@@ -250,34 +264,28 @@ static void setup_preset_drawer(void)
 
 static void setup_main_screen(void)
 {
-	/* Box Main */
-	lv_coord_t box_main_width = LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH + 30;
-	box_main = lv_obj_create(lv_scr_act(), NULL);
-	lv_obj_clean_style_list(box_main, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_main, box_main_width, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
-	lv_obj_set_pos(box_main, 0, TITLEBAR_HEIGHT);
-
 	/* Power Bar */
-	bar_power = lv_bar_create(box_main, NULL);
+	bar_power = lv_bar_create(lv_scr_act(), NULL);
 	lv_theme_apply(bar_power, (lv_theme_style_t)CUSTOM_THEME_POWER_BAR);
-	lv_obj_set_size(bar_power, 15, LV_VER_RES_MAX - TITLEBAR_HEIGHT - 20);
+	lv_obj_set_size(bar_power, POWER_BAR_WIDTH, (LV_VER_RES_MAX - TITLEBAR_HEIGHT - (2 * POWER_BAR_PADDING_VER)));
 	lv_bar_set_anim_time(bar_power, 500);
 	lv_bar_set_range(bar_power, 0, 20);
 	lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
-	lv_obj_align(bar_power, NULL, LV_ALIGN_IN_LEFT_MID, 10, 0);
+	lv_obj_align(bar_power, NULL, LV_ALIGN_IN_BOTTOM_LEFT, POWER_BAR_PADDING_HOR, -(POWER_BAR_PADDING_VER));
 
 	/* Box Center */
-	lv_coord_t box_center_width = box_main_width - 35;
-	lv_obj_t *box_center = lv_obj_create(box_main, NULL);
+	lv_obj_t *box_center = lv_obj_create(lv_scr_act(), NULL);
 	lv_obj_clean_style_list(box_center, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_center, box_center_width, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
-	lv_obj_set_pos(box_center, 15, 0);
+	lv_obj_set_size(box_center, CENTER_AREA_WIDTH, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
+	lv_obj_set_pos(box_center, (POWER_BAR_WIDTH + POWER_BAR_PADDING_HOR), TITLEBAR_HEIGHT);
+	// lv_obj_set_style_local_border_width(box_center, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 1);
+	// lv_obj_set_style_local_border_color(box_center, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
 
 	/* Label Iron Status */
 	lbl_iron_id = lv_label_create(box_center, NULL);
 	lv_label_set_long_mode(lbl_iron_id, LV_LABEL_LONG_CROP);
 	lv_label_set_align(lbl_iron_id, LV_LABEL_ALIGN_CENTER);
-	lv_obj_set_size(lbl_iron_id, box_center_width, lv_font_montserrat_24.line_height);
+	lv_obj_set_size(lbl_iron_id, CENTER_AREA_WIDTH, lv_font_montserrat_24.line_height);
 	lv_label_set_text(lbl_iron_id, "Iron A - T245");
 	lv_obj_align(lbl_iron_id, NULL, LV_ALIGN_IN_TOP_MID, 0, 10);
 	lv_obj_set_style_local_text_font(lbl_iron_id, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_24);
@@ -316,14 +324,14 @@ static void setup_main_screen(void)
 	/* Box Sleep */
 	box_sleep = lv_obj_create(box_center, NULL);
 	lv_obj_clean_style_list(box_sleep, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_sleep, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 120);
+	lv_obj_set_size(box_sleep, CENTER_AREA_WIDTH, 120);
 	lv_obj_align(box_sleep, NULL, LV_ALIGN_IN_TOP_MID, 0, 37);
 
 	/* Label Iron State Title */
 	lbl_iron_state_title = lv_label_create(box_sleep, NULL);
 	lv_label_set_long_mode(lbl_iron_state_title, LV_LABEL_LONG_CROP);
 	lv_label_set_align(lbl_iron_state_title, LV_LABEL_ALIGN_CENTER);
-	lv_obj_set_size(lbl_iron_state_title, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 50);
+	lv_obj_set_size(lbl_iron_state_title, CENTER_AREA_WIDTH, 50);
 	lv_label_set_text(lbl_iron_state_title, "");
 	lv_obj_align(lbl_iron_state_title, NULL, LV_ALIGN_IN_LEFT_MID, 0, -25);
 	lv_obj_set_style_local_text_font(lbl_iron_state_title, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_40);
@@ -334,7 +342,7 @@ static void setup_main_screen(void)
 	lbl_iron_state_msg1 = lv_label_create(box_sleep, NULL);
 	lv_label_set_long_mode(lbl_iron_state_msg1, LV_LABEL_LONG_CROP);
 	lv_label_set_align(lbl_iron_state_msg1, LV_LABEL_ALIGN_CENTER);
-	lv_obj_set_size(lbl_iron_state_msg1, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 20);
+	lv_obj_set_size(lbl_iron_state_msg1, CENTER_AREA_WIDTH, 20);
 	lv_label_set_text(lbl_iron_state_msg1, "");
 	lv_obj_align(lbl_iron_state_msg1, NULL, LV_ALIGN_IN_LEFT_MID, 0, 10);
 	lv_obj_set_style_local_text_font(lbl_iron_state_msg1, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_18);
@@ -343,7 +351,7 @@ static void setup_main_screen(void)
 	lbl_iron_state_msg2 = lv_label_create(box_sleep, NULL);
 	lv_label_set_long_mode(lbl_iron_state_msg2, LV_LABEL_LONG_CROP);
 	lv_label_set_align(lbl_iron_state_msg2, LV_LABEL_ALIGN_CENTER);
-	lv_obj_set_size(lbl_iron_state_msg2, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 20);
+	lv_obj_set_size(lbl_iron_state_msg2, CENTER_AREA_WIDTH, 20);
 	lv_label_set_text(lbl_iron_state_msg2, "");
 	lv_obj_align(lbl_iron_state_msg2, NULL, LV_ALIGN_IN_LEFT_MID, 0, 35);
 	lv_obj_set_style_local_text_font(lbl_iron_state_msg2, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_18);
@@ -351,8 +359,8 @@ static void setup_main_screen(void)
 	/* Box Setpoint */
 	box_setpoint = lv_obj_create(box_center, NULL);
 	lv_obj_clean_style_list(box_setpoint, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_setpoint, box_center_width, 36);
-	lv_obj_align(box_setpoint, NULL, LV_ALIGN_CENTER, 0, BOX_SETPOINT_POS_SLEEP);
+	lv_obj_set_size(box_setpoint, CENTER_AREA_WIDTH, 36);
+	lv_obj_align(box_setpoint, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -10);
 
 	/* Temperature setpoint label */
 	lbl_setpoint = lv_label_create(box_setpoint, NULL);
