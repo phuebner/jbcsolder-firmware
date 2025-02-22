@@ -1,12 +1,12 @@
 /**
- * @file theme.c    
+ * @file theme.c
  * @author Patrick Huebner (phuebner86@gmail.com)
  * @brief GUI Theme
  * @version 0.1
  * @date 2021-01-06
- * 
+ *
  * @copyright Copyright (c) 2021
- * 
+ *
  */
 
 /* -------------------------------------------------------------------------- */
@@ -20,7 +20,7 @@
 /* -------------------------------------------------------------------------- */
 
 static void styles_init();
-static void theme_apply_cb(lv_theme_t * th, lv_obj_t * obj, lv_theme_style_t name);
+static void theme_apply_cb(lv_theme_t *th, lv_obj_t *obj, lv_theme_style_t name);
 
 /* -------------------------------------------------------------------------- */
 /*                              STATIC VARIABLES                              */
@@ -52,18 +52,18 @@ static lv_style_t sty_power_bar_indicator;
 // lv_theme_t * theme_init(lv_color_t color_primary, lv_color_t color_secondary, uint32_t flags,
 //                                     const lv_font_t * font_small, const lv_font_t * font_normal, const lv_font_t * font_subtitle,
 //                                     const lv_font_t * font_title)
-lv_theme_t * theme_init()
+lv_theme_t *theme_init()
 {
     /*Initialize styles for the new theme*/
     styles_init();
 
-    /*Get the current theme (e.g. material). It will be the base of the custom theme.*/   
-    lv_theme_t * base_theme = lv_theme_get_act();
+    /*Get the current theme (e.g. material). It will be the base of the custom theme.*/
+    lv_theme_t *base_theme = lv_theme_get_act();
 
     /*Initialize a custom theme*/
-    lv_theme_copy(&custom_theme, base_theme);               /*Initialize the custom theme from the base theme*/                           
-    lv_theme_set_apply_cb(&custom_theme, theme_apply_cb);  /*Set a custom theme apply callback*/
-    lv_theme_set_base(&custom_theme, base_theme);            /*Set the base theme of the csutom theme*/
+    lv_theme_copy(&custom_theme, base_theme);             /*Initialize the custom theme from the base theme*/
+    lv_theme_set_apply_cb(&custom_theme, theme_apply_cb); /*Set a custom theme apply callback*/
+    lv_theme_set_base(&custom_theme, base_theme);         /*Set the base theme of the csutom theme*/
 
     custom_theme.color_primary = COLOR_PRIMARY;
     // custom_theme.color_secondary = color_secondary;
@@ -85,11 +85,11 @@ static void styles_init(void)
     /* Titlebar background */
     lv_style_init(&sty_title_bg);
     lv_style_set_bg_opa(&sty_title_bg, LV_STATE_DEFAULT,
-            LV_OPA_COVER);
+                        LV_OPA_COVER);
     lv_style_set_bg_color(&sty_title_bg, LV_STATE_DEFAULT,
-            custom_theme.color_primary);
+                          custom_theme.color_primary);
     lv_style_set_bg_color(&sty_title_bg, LV_STATE_DEFAULT,
-            COLOR_PRIMARY);
+                          COLOR_PRIMARY);
 
     /* Titlebar button */
     lv_style_init(&sty_titlebar_btn);
@@ -110,7 +110,7 @@ static void styles_init(void)
     lv_style_set_shadow_spread(&sty_preset_drawer_bg, LV_STATE_DEFAULT, 1);
     lv_style_set_shadow_ofs_x(&sty_preset_drawer_bg, LV_STATE_DEFAULT, -2);
     lv_style_set_shadow_ofs_y(&sty_preset_drawer_bg, LV_STATE_DEFAULT, 2);
-    lv_style_set_shadow_opa(&sty_preset_drawer_bg, LV_STATE_DEFAULT, LV_OPA_30);    
+    lv_style_set_shadow_opa(&sty_preset_drawer_bg, LV_STATE_DEFAULT, LV_OPA_30);
 
     /* Preset button */
     lv_style_init(&sty_preset_btn);
@@ -125,71 +125,70 @@ static void styles_init(void)
     /* Preset drawer seperators */
     lv_style_init(&sty_preset_separator);
     lv_style_set_line_width(&sty_preset_separator, LV_STATE_DEFAULT, 1);
-    lv_style_set_line_color(&sty_preset_separator, LV_STATE_DEFAULT, COLOR_PRESET_SEPERATOR);
+    lv_style_set_line_color(&sty_preset_separator, LV_STATE_DEFAULT, COLOR_PRESET_SEPARATOR);
     lv_style_set_line_rounded(&sty_preset_separator, LV_STATE_DEFAULT, false);
 
     /* Power bar bg*/
     lv_style_init(&sty_power_bar_bg);
     lv_style_set_radius(&sty_power_bar_bg, LV_STATE_DEFAULT, 4);
-    
+
     /* Power bar inidcator */
     lv_style_init(&sty_power_bar_indicator);
     lv_style_set_radius(&sty_power_bar_indicator, LV_STATE_DEFAULT, 4);
     lv_style_set_bg_color(&sty_power_bar_indicator, LV_STATE_DEFAULT,
-            COLOR_PRIMARY);
-
+                          COLOR_PRIMARY);
 }
 
-static void theme_apply_cb(lv_theme_t * th, lv_obj_t * obj, lv_theme_style_t name)
+static void theme_apply_cb(lv_theme_t *th, lv_obj_t *obj, lv_theme_style_t name)
 {
-    lv_style_list_t * list;
+    lv_style_list_t *list;
 
     /*To avoid warnings*/
-    uint32_t name_int = (uint32_t) name;
-    switch(name_int) {
-        case CUSTOM_THEME_TITLE_BG:
-            lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
-            list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
-            _lv_style_list_add_style(list, &sty_title_bg);
-            break;
+    uint32_t name_int = (uint32_t)name;
+    switch (name_int)
+    {
+    case CUSTOM_THEME_TITLE_BG:
+        lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
+        _lv_style_list_add_style(list, &sty_title_bg);
+        break;
 
-        case CUSTOM_THEME_TITLEBAR_BTN:
-            lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
-            list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
-            _lv_style_list_add_style(list, &sty_titlebar_btn);
-            break;
+    case CUSTOM_THEME_TITLEBAR_BTN:
+        lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
+        _lv_style_list_add_style(list, &sty_titlebar_btn);
+        break;
 
-        case CUSTOM_THEME_PRESET_DRAWER:
-            lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
-            list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
-            _lv_style_list_add_style(list, &sty_preset_drawer_bg);
-            break;
+    case CUSTOM_THEME_PRESET_DRAWER:
+        lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
+        _lv_style_list_add_style(list, &sty_preset_drawer_bg);
+        break;
 
-        case CUSTOM_THEME_PRESET_BTN:
-            lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
-            list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
-            _lv_style_list_add_style(list, &sty_preset_btn);
-            break;
+    case CUSTOM_THEME_PRESET_BTN:
+        lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
+        _lv_style_list_add_style(list, &sty_preset_btn);
+        break;
 
-        case CUSTOM_THEME_PRESET_SEPARATOR:
-            lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
-            list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
-            _lv_style_list_add_style(list, &sty_preset_separator);
-            break;
+    case CUSTOM_THEME_PRESET_SEPARATOR:
+        lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_OBJ_PART_MAIN);
+        _lv_style_list_add_style(list, &sty_preset_separator);
+        break;
 
-        case CUSTOM_THEME_POWER_BAR:
-            // lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
-            list = lv_obj_get_style_list(obj, LV_BAR_PART_BG);
-            _lv_style_list_add_style(list, &sty_power_bar_bg);
-            list = lv_obj_get_style_list(obj, LV_BAR_PART_INDIC);
-            _lv_style_list_add_style(list, &sty_power_bar_indicator);
-            break;
+    case CUSTOM_THEME_POWER_BAR:
+        // lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_BAR_PART_BG);
+        _lv_style_list_add_style(list, &sty_power_bar_bg);
+        list = lv_obj_get_style_list(obj, LV_BAR_PART_INDIC);
+        _lv_style_list_add_style(list, &sty_power_bar_indicator);
+        break;
 
-        default: 
-            break;
+    default:
+        break;
     }
-    
-    
+
     // switch(name_int) {
     //     case LV_THEME_NONE:
     //         break;
@@ -212,7 +211,6 @@ static void theme_apply_cb(lv_theme_t * th, lv_obj_t * obj, lv_theme_style_t nam
     //         _lv_style_list_add_style(list, &style_box);
     //         _lv_style_list_add_style(list, &style_box_border);
     //         break;
-
 
     //     case LV_THEME_CONT:
     //         lv_obj_clean_style_list(obj, LV_OBJ_PART_MAIN);
@@ -315,7 +313,6 @@ static void theme_apply_cb(lv_theme_t * th, lv_obj_t * obj, lv_theme_style_t nam
     //         _lv_style_list_add_style(list, &style_list_btn);
     //         break;
 
-
     //     case LV_THEME_ARC:
     //         lv_obj_clean_style_list(obj, LV_ARC_PART_BG);
     //         list = lv_obj_get_style_list(obj, LV_ARC_PART_BG);
@@ -325,7 +322,6 @@ static void theme_apply_cb(lv_theme_t * th, lv_obj_t * obj, lv_theme_style_t nam
     //         list = lv_obj_get_style_list(obj, LV_ARC_PART_INDIC);
     //         _lv_style_list_add_style(list, &style_arc_indic);
     //         break;
-
 
     //     case LV_THEME_SWITCH:
     //         lv_obj_clean_style_list(obj, LV_SWITCH_PART_BG);
@@ -365,7 +361,6 @@ static void theme_apply_cb(lv_theme_t * th, lv_obj_t * obj, lv_theme_style_t nam
     //     default:
     //         break;
     // }
-
 
     lv_obj_refresh_style(obj, LV_OBJ_PART_ALL, LV_STYLE_PROP_ALL);
 }

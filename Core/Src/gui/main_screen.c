@@ -70,7 +70,6 @@ static lv_obj_t *box_power_bar;
 static lv_obj_t *lbl_iron_id;
 static lv_obj_t *lbl_temperature;
 static lv_obj_t *lbl_setpoint;
-static lv_obj_t *lbl_power_bar;
 static lv_obj_t *bar_power;
 static lv_obj_t *btn_quick1;
 static lv_obj_t *btn_quick2;
@@ -222,7 +221,7 @@ static void setup_preset_drawer(void)
 	lv_label_set_text(lbl_btn_quick3, "250");
 	lv_obj_set_event_cb(btn_quick3, btn_quick_event_cb);
 
-	/* Seperators */
+	/* Separators */
 	static lv_point_t line_points[] = {{0, 0}, {PRESET_DRAWER_WIDTH - 10, 0}};
 
 	lv_obj_t *line1 = lv_line_create(om, NULL);
@@ -252,23 +251,39 @@ static void setup_preset_drawer(void)
 static void setup_main_screen(void)
 {
 	/* Box Main */
-	lv_coord_t box_main_width = LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH;
+	lv_coord_t box_main_width = LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH + 30;
 	box_main = lv_obj_create(lv_scr_act(), NULL);
 	lv_obj_clean_style_list(box_main, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_main, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
+	lv_obj_set_size(box_main, box_main_width, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
 	lv_obj_set_pos(box_main, 0, TITLEBAR_HEIGHT);
 
+	/* Power Bar */
+	bar_power = lv_bar_create(box_main, NULL);
+	lv_theme_apply(bar_power, (lv_theme_style_t)CUSTOM_THEME_POWER_BAR);
+	lv_obj_set_size(bar_power, 15, LV_VER_RES_MAX - TITLEBAR_HEIGHT - 20);
+	lv_bar_set_anim_time(bar_power, 500);
+	lv_bar_set_range(bar_power, 0, 20);
+	lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
+	lv_obj_align(bar_power, NULL, LV_ALIGN_IN_LEFT_MID, 10, 0);
+
+	/* Box Center */
+	lv_coord_t box_center_width = box_main_width - 35;
+	lv_obj_t *box_center = lv_obj_create(box_main, NULL);
+	lv_obj_clean_style_list(box_center, LV_OBJ_PART_MAIN);
+	lv_obj_set_size(box_center, box_center_width, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
+	lv_obj_set_pos(box_center, 15, 0);
+
 	/* Label Iron Status */
-	lbl_iron_id = lv_label_create(box_main, NULL);
+	lbl_iron_id = lv_label_create(box_center, NULL);
 	lv_label_set_long_mode(lbl_iron_id, LV_LABEL_LONG_CROP);
 	lv_label_set_align(lbl_iron_id, LV_LABEL_ALIGN_CENTER);
-	lv_obj_set_size(lbl_iron_id, box_main_width, lv_font_montserrat_24.line_height);
+	lv_obj_set_size(lbl_iron_id, box_center_width, lv_font_montserrat_24.line_height);
 	lv_label_set_text(lbl_iron_id, "Iron A - T245");
 	lv_obj_align(lbl_iron_id, NULL, LV_ALIGN_IN_TOP_MID, 0, 10);
 	lv_obj_set_style_local_text_font(lbl_iron_id, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_24);
 
 	/* Box Temperature */
-	box_temperature = lv_obj_create(box_main, NULL);
+	box_temperature = lv_obj_create(box_center, NULL);
 	lv_obj_set_style_local_bg_opa(box_temperature, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 0);
 	lv_obj_set_style_local_border_opa(box_temperature, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 0);
 
@@ -293,13 +308,13 @@ static void setup_main_screen(void)
 	lv_obj_align(lbl_unit, lbl_temperature, LV_ALIGN_OUT_RIGHT_TOP, 0, -3);
 
 	/* Align temperature container*/
-	lv_obj_align(box_temperature, NULL, LV_ALIGN_CENTER, 0, -25);
+	lv_obj_align(box_temperature, NULL, LV_ALIGN_CENTER, 0, -10);
 
 	/* Initially hide box temperature */
 	lv_obj_set_hidden(box_temperature, true);
 
 	/* Box Sleep */
-	box_sleep = lv_obj_create(box_main, NULL);
+	box_sleep = lv_obj_create(box_center, NULL);
 	lv_obj_clean_style_list(box_sleep, LV_OBJ_PART_MAIN);
 	lv_obj_set_size(box_sleep, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 120);
 	lv_obj_align(box_sleep, NULL, LV_ALIGN_IN_TOP_MID, 0, 37);
@@ -312,6 +327,8 @@ static void setup_main_screen(void)
 	lv_label_set_text(lbl_iron_state_title, "");
 	lv_obj_align(lbl_iron_state_title, NULL, LV_ALIGN_IN_LEFT_MID, 0, -25);
 	lv_obj_set_style_local_text_font(lbl_iron_state_title, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_40);
+	lv_obj_set_click(lbl_iron_state_title, true);
+	lv_obj_set_event_cb(lbl_iron_state_title, main_screen_btn_en_event_cb);
 
 	/* Label Iron State_MSG1 */
 	lbl_iron_state_msg1 = lv_label_create(box_sleep, NULL);
@@ -332,9 +349,9 @@ static void setup_main_screen(void)
 	lv_obj_set_style_local_text_font(lbl_iron_state_msg2, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_18);
 
 	/* Box Setpoint */
-	box_setpoint = lv_obj_create(box_main, NULL);
+	box_setpoint = lv_obj_create(box_center, NULL);
 	lv_obj_clean_style_list(box_setpoint, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_setpoint, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 36);
+	lv_obj_set_size(box_setpoint, box_center_width, 36);
 	lv_obj_align(box_setpoint, NULL, LV_ALIGN_CENTER, 0, BOX_SETPOINT_POS_SLEEP);
 
 	/* Temperature setpoint label */
@@ -363,30 +380,6 @@ static void setup_main_screen(void)
 	// lv_obj_set_style_local_text_font(btn_dec_setpoint, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_24);
 	lv_obj_set_style_local_value_str(btn_dec_setpoint, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_SYMBOL_MINUS);
 	lv_obj_set_event_cb(btn_dec_setpoint, btn_dec_setpoint_event_cb);
-
-	/* Box Power Bar */
-	box_power_bar = lv_obj_create(box_main, NULL);
-	lv_obj_clean_style_list(box_power_bar, LV_OBJ_PART_MAIN);
-	lv_obj_set_size(box_power_bar, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, 45);
-	lv_obj_align(box_power_bar, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
-
-	/* Label Power Bar */
-	lbl_power_bar = lv_label_create(box_power_bar, NULL);
-	lv_label_set_align(lbl_power_bar, LV_LABEL_ALIGN_CENTER);
-	lv_label_set_text(lbl_power_bar, "Power\n4\%");
-	lv_obj_set_style_local_text_font(lbl_power_bar, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_14);
-	lv_obj_align(lbl_power_bar, NULL, LV_ALIGN_IN_LEFT_MID, 10, 0);
-
-	/* Power Bar */
-	bar_power = lv_bar_create(box_power_bar, NULL);
-	lv_theme_apply(bar_power, (lv_theme_style_t)CUSTOM_THEME_POWER_BAR);
-	lv_obj_set_size(bar_power, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH - 70, 25);
-	lv_bar_set_anim_time(bar_power, 500);
-	lv_bar_set_range(bar_power, 0, 20);
-	lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
-	lv_obj_align(bar_power, NULL, LV_ALIGN_IN_RIGHT_MID, -10, 0);
-
-	lv_obj_set_hidden(box_power_bar, true);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -408,6 +401,10 @@ LV_EVENT_CB_DECLARE(encoder_target_event_cb)
 			iron_set_setpoint(iron_get_setpoint() - SETPOINT_STEP_SIZE);
 			break;
 		}
+	}
+	else if (e == LV_EVENT_PRESSED)
+	{
+		// iron_set_enable(!iron_is_enabled());
 	}
 }
 
@@ -449,6 +446,9 @@ static void main_screen_btn_en_event_cb(lv_obj_t *obj, lv_event_t event)
 	{
 	case LV_EVENT_VALUE_CHANGED:
 		iron_set_enable(lv_btn_get_state(obj) == LV_BTN_STATE_CHECKED_RELEASED);
+		break;
+	case LV_EVENT_CLICKED:
+		iron_set_enable(!iron_is_enabled());
 		break;
 	}
 }
@@ -537,17 +537,13 @@ static void main_screen_refresher_task(struct _lv_task_t *taskh)
 		if (new_iron_state == IRON_STATE_ACTIVE)
 		{
 			lv_obj_set_hidden(box_temperature, false);
-			lv_obj_set_hidden(box_power_bar, false);
 			lv_obj_set_hidden(box_sleep, true);
-			lv_obj_align(box_setpoint, NULL, LV_ALIGN_CENTER, 0, BOX_SETPOINT_POS_ACTIVE);
 		}
 
 		if (prev_iron_state == IRON_STATE_ACTIVE)
 		{
 			lv_obj_set_hidden(box_temperature, true);
-			lv_obj_set_hidden(box_power_bar, true);
 			lv_obj_set_hidden(box_sleep, false);
-			lv_obj_align(box_setpoint, NULL, LV_ALIGN_CENTER, 0, BOX_SETPOINT_POS_SLEEP);
 		}
 
 		switch (new_iron_state)

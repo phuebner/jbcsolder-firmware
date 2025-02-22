@@ -32,7 +32,7 @@ extern "C"
 #define COLOR_WHITE lv_color_hex(0xFFFFFF)
 
 #define COLOR_BG_PRESET_DRAWER lv_color_hex(0x4D4D4D)
-#define COLOR_PRESET_SEPERATOR lv_color_hex(0x8F8F8F)
+#define COLOR_PRESET_SEPARATOR lv_color_hex(0x8F8F8F)
 
     // #define LV_DEMO_PRINTER_WHITE           lv_color_hex(0xffffff)
     // #define LV_DEMO_PRINTER_LIGHT           lv_color_hex(0xf3f8fe)
@@ -42,7 +42,7 @@ extern "C"
     // #define LV_DEMO_PRINTER_GREEN           lv_color_hex(0x4cb242)
     // #define LV_DEMO_PRINTER_RED             lv_color_hex(0xd51732)
 
-#define PRESET_DRAWER_WIDTH 80
+#define PRESET_DRAWER_WIDTH 65
 #define PRESET_DRAWER_HEIGHT (LV_VER_RES_MAX - 21)
 
 #define TITLEBAR_HEIGHT 35
