@@ -1,15 +1,17 @@
-#ifndef __FT6236U_H__
-#define __FT6236U_H__
+#ifndef FT6236U_FT6236U
+#define FT6236U_FT6236U
 #include "main.h"
 
-typedef enum {
+typedef enum
+{
 	TOUCH_EVENT_PRESSED = 0,
 	TOUCH_EVENT_REL = 1,
 	TOUCH_EVENT_CONTACT = 2,
 	TOUCH_EVENT_NONE = 3,
 } touch_event_type_t;
 
-typedef struct {
+typedef struct
+{
 	touch_event_type_t type;
 	uint16_t x;
 	uint16_t y;
@@ -23,4 +25,4 @@ touch_event_t touch_get_last_event();
 
 void touch_interrupt_handler();
 
-#endif
+#endif /* FT6236U_FT6236U */

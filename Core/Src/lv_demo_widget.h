@@ -3,11 +3,12 @@
  *
  */
 
-#ifndef LV_DEMO_WIDGETS_H
-#define LV_DEMO_WIDGETS_H
+#ifndef LV_DEMO_WIDGET
+#define LV_DEMO_WIDGET
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /*********************
@@ -17,22 +18,22 @@ extern "C" {
 /*********************
  *      DEFINES
  *********************/
-#define LV_USE_DEMO_WIDGETS        1
-/**********************
- *      TYPEDEFS
- **********************/
+#define LV_USE_DEMO_WIDGETS 1
+    /**********************
+     *      TYPEDEFS
+     **********************/
 
-/**********************
- * GLOBAL PROTOTYPES
- **********************/
-void lv_demo_widgets(void);
+    /**********************
+     * GLOBAL PROTOTYPES
+     **********************/
+    void lv_demo_widgets(void);
 
-/**********************
- *      MACROS
- **********************/
+    /**********************
+     *      MACROS
+     **********************/
 
 #ifdef __cplusplus
 } /* extern "C" */
-#endif
+#endif /* LV_DEMO_WIDGET */
 
 #endif /*LV_DEMO_WIDGETS_H*/
