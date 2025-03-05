@@ -19,7 +19,7 @@
 /*                              STATIC PROTOTYPES                             */
 /* -------------------------------------------------------------------------- */
 
-static void styles_init();
+static void styles_init(void);
 static void theme_apply_cb(lv_theme_t *th, lv_obj_t *obj, lv_theme_style_t name);
 
 /* -------------------------------------------------------------------------- */
@@ -33,6 +33,7 @@ static lv_style_t sty_preset_btn;
 static lv_style_t sty_preset_separator;
 static lv_style_t sty_power_bar_bg;
 static lv_style_t sty_power_bar_indicator;
+static lv_style_t sty_sidebar_btn;
 
 /* -------------------------------------------------------------------------- */
 /*                              GLOBAL FUNCTIONS                              */
@@ -86,17 +87,19 @@ static void styles_init(void)
     lv_style_init(&sty_title_bg);
     lv_style_set_bg_opa(&sty_title_bg, LV_STATE_DEFAULT,
                         LV_OPA_COVER);
-    lv_style_set_bg_color(&sty_title_bg, LV_STATE_DEFAULT,
-                          custom_theme.color_primary);
+    // lv_style_set_bg_color(&sty_title_bg, LV_STATE_DEFAULT,
+    //                       custom_theme.color_primary);
     lv_style_set_bg_color(&sty_title_bg, LV_STATE_DEFAULT,
                           COLOR_PRIMARY);
 
     /* Titlebar button */
     lv_style_init(&sty_titlebar_btn);
-    lv_style_set_bg_opa(&sty_titlebar_btn, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_style_set_bg_opa(&sty_titlebar_btn, LV_STATE_DEFAULT, LV_OPA_COVER);
+    lv_style_set_bg_color(&sty_titlebar_btn, LV_STATE_DEFAULT, COLOR_PRIMARY);
     lv_style_set_text_color(&sty_titlebar_btn, LV_STATE_DEFAULT, COLOR_WHITE);
     lv_style_set_value_color(&sty_titlebar_btn, LV_STATE_DEFAULT, COLOR_WHITE);
-    lv_style_set_text_font(&sty_titlebar_btn, LV_STATE_DEFAULT, &lv_font_symbols_24);
+    lv_style_set_text_font(&sty_titlebar_btn, LV_STATE_DEFAULT, &lv_font_symbols_28);
+    lv_style_set_radius(&sty_titlebar_btn, LV_STATE_DEFAULT, 20);
     // lv_style_set_margin_all(&sty_titlebar_btn, LV_STATE_DEFAULT, 0);
     // lv_style_set_pad_all(&sty_titlebar_btn, LV_STATE_DEFAULT, 0);
 
@@ -118,11 +121,12 @@ static void styles_init(void)
     lv_style_set_bg_opa(&sty_preset_btn, LV_STATE_PRESSED, LV_OPA_30);
     lv_style_set_bg_color(&sty_preset_btn, LV_STATE_PRESSED, LV_COLOR_BLACK);
     lv_style_set_text_color(&sty_preset_btn, LV_STATE_DEFAULT, COLOR_WHITE);
+    lv_style_set_radius(&sty_preset_btn, LV_STATE_DEFAULT, 10);
     lv_style_set_text_font(&sty_preset_btn, LV_STATE_DEFAULT, &lv_font_roboto_28);
     lv_style_set_margin_all(&sty_preset_btn, LV_STATE_DEFAULT, 0);
     lv_style_set_pad_all(&sty_preset_btn, LV_STATE_DEFAULT, 0);
 
-    /* Preset drawer seperators */
+    /* Preset drawer separators */
     lv_style_init(&sty_preset_separator);
     lv_style_set_line_width(&sty_preset_separator, LV_STATE_DEFAULT, 1);
     lv_style_set_line_color(&sty_preset_separator, LV_STATE_DEFAULT, COLOR_PRESET_SEPARATOR);
@@ -137,6 +141,14 @@ static void styles_init(void)
     lv_style_set_radius(&sty_power_bar_indicator, LV_STATE_DEFAULT, 4);
     lv_style_set_bg_color(&sty_power_bar_indicator, LV_STATE_DEFAULT,
                           COLOR_PRIMARY);
+
+    /* Sidebar button */
+    lv_style_init(&sty_sidebar_btn);
+    lv_style_set_bg_opa(&sty_sidebar_btn, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_style_set_text_color(&sty_sidebar_btn, LV_STATE_DEFAULT, COLOR_WHITE);
+    lv_style_set_value_color(&sty_sidebar_btn, LV_STATE_DEFAULT, COLOR_WHITE);
+    lv_style_set_text_font(&sty_sidebar_btn, LV_STATE_DEFAULT, &lv_font_symbols_28);
+    lv_style_set_radius(&sty_sidebar_btn, LV_STATE_DEFAULT, 0);
 }
 
 static void theme_apply_cb(lv_theme_t *th, lv_obj_t *obj, lv_theme_style_t name)
@@ -183,6 +195,12 @@ static void theme_apply_cb(lv_theme_t *th, lv_obj_t *obj, lv_theme_style_t name)
         _lv_style_list_add_style(list, &sty_power_bar_bg);
         list = lv_obj_get_style_list(obj, LV_BAR_PART_INDIC);
         _lv_style_list_add_style(list, &sty_power_bar_indicator);
+        break;
+
+    case CUSTOM_THEME_SIDEBAR_BTN:
+        lv_obj_clean_style_list(obj, LV_BTN_PART_MAIN);
+        list = lv_obj_get_style_list(obj, LV_BTN_PART_MAIN);
+        _lv_style_list_add_style(list, &sty_sidebar_btn);
         break;
 
     default:

@@ -34,6 +34,11 @@ extern "C"
 #define COLOR_BG_PRESET_DRAWER lv_color_hex(0x4D4D4D)
 #define COLOR_PRESET_SEPARATOR lv_color_hex(0x8F8F8F)
 
+#define COLOR_BG_TITLEBAR lv_color_hex(0xA00101)      // dark red
+#define COLOR_BG_PRESET_DRAWER lv_color_hex(0x4D4D4D) // dark grey
+
+#define ANIMATION_TIME 200
+
     // #define LV_DEMO_PRINTER_WHITE           lv_color_hex(0xffffff)
     // #define LV_DEMO_PRINTER_LIGHT           lv_color_hex(0xf3f8fe)
     // #define LV_DEMO_PRINTER_GRAY            lv_color_hex(0x8a8a8a)
@@ -54,7 +59,8 @@ extern "C"
         CUSTOM_THEME_PRESET_DRAWER,
         CUSTOM_THEME_PRESET_BTN,
         CUSTOM_THEME_PRESET_SEPARATOR,
-        CUSTOM_THEME_POWER_BAR
+        CUSTOM_THEME_POWER_BAR,
+        CUSTOM_THEME_SIDEBAR_BTN
     } custom_theme_style_t;
 
     /* -------------------------------------------------------------------------- */

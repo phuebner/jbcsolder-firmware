@@ -11,21 +11,18 @@
 #include "theme.h"
 #include "../iron.h"
 #include "main_screen.h"
+#include "screen_menu.h"
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
 /* -------------------------------------------------------------------------- */
 
 #define SETPOINT_STEP_SIZE 5
-#define ANIMATION_TIME 200
-
-/* --------------------------------- Colors --------------------------------- */
-#define COLOR_BG_TITLEBAR lv_color_hex(0xA00101)	  // dark red
-#define COLOR_BG_PRESET_DRAWER lv_color_hex(0x4D4D4D) // dark grey
 
 /* -------------------------------------------------------------------------- */
 /*                              STATIC PROTOTYPES                             */
 /* -------------------------------------------------------------------------- */
+static void create_main_screen(void);
 
 static void setup_styles(void);
 static void setup_encoder_target(void);
@@ -36,8 +33,11 @@ LV_EVENT_CB_DECLARE(encoder_target_event_cb);
 LV_EVENT_CB_DECLARE(btn_inc_setpoint_event_cb);
 LV_EVENT_CB_DECLARE(btn_dec_setpoint_event_cb);
 static void btn_quick_event_cb(lv_obj_t *obj, lv_event_t event);
-static void main_screen_btn_en_event_cb(lv_obj_t *obj, lv_event_t event);
+static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event);
 static void main_screen_refresher_task(struct _lv_task_t *);
+
+static void switch_to_menu_event_cb(lv_obj_t *obj, lv_event_t event);
+static void return_to_home_event_cb(lv_obj_t *obj, lv_event_t event);
 
 const char *state_str[] = {
 	[IRON_STATE_NOT_CONNECTED] = "Not Connected",
@@ -55,13 +55,13 @@ static lv_style_t sty_current_temp;
 static lv_style_t sty_lbl_unit;
 
 static lv_obj_t *scr_home;
+static lv_obj_t *scr_menu;
 
 static lv_obj_t *box_titlebar;
 static lv_obj_t *box_presets;
 static lv_obj_t *box_temperature;
 static lv_obj_t *box_setpoint;
 static lv_obj_t *box_sleep;
-static lv_obj_t *box_power_bar;
 
 static lv_obj_t *lbl_iron_id;
 static lv_obj_t *lbl_temperature;
@@ -77,6 +77,9 @@ static lv_obj_t *lbl_iron_state_msg2;
 
 static lv_group_t *g;
 
+static lv_task_t *main_screen_task_handle;
+static bool initial_run;
+
 /* Sizes */
 static const lv_coord_t TITLEBAR_HEIGHT = 35;
 static const lv_coord_t TITLEBAR_BUTTON_HEIGHT = 55;
@@ -89,6 +92,7 @@ static const lv_coord_t POWER_BAR_PADDING_HOR = 10;
 static const lv_coord_t POWER_BAR_PADDING_VER = 14;
 
 static const lv_coord_t CENTER_AREA_WIDTH = (LV_HOR_RES_MAX - POWER_BAR_PADDING_HOR - POWER_BAR_WIDTH - DRAWER_WIDTH);
+static const lv_point_t CENTER_AREA_POSITION = {x : POWER_BAR_WIDTH + POWER_BAR_PADDING_HOR, y : TITLEBAR_HEIGHT};
 
 /* -------------------------------------------------------------------------- */
 /*                              PUBLIC FUNCTIONS                              */
@@ -100,23 +104,30 @@ static const lv_coord_t CENTER_AREA_WIDTH = (LV_HOR_RES_MAX - POWER_BAR_PADDING_
  */
 void gui_init(void)
 {
-	scr_home = lv_obj_create(NULL, NULL);
-	lv_scr_load(scr_home);
 
 	lv_theme_t *theme = theme_init();
 	lv_theme_set_act(theme);
 	setup_styles();
-	setup_encoder_target();
-	setup_titlebar();
-	setup_preset_drawer();
-	setup_main_screen();
 
-	lv_task_create(main_screen_refresher_task, 10, LV_TASK_PRIO_MID, NULL);
+	create_main_screen();
 }
 
 /* -------------------------------------------------------------------------- */
 /*                              STATIC FUNCTIONS                              */
 /* -------------------------------------------------------------------------- */
+
+static void create_main_screen(void)
+{
+	scr_home = lv_obj_create(NULL, NULL);
+	lv_scr_load(scr_home);
+	setup_encoder_target();
+	setup_main_screen();
+	setup_titlebar();
+	setup_preset_drawer();
+
+	initial_run = true;
+	main_screen_task_handle = lv_task_create(main_screen_refresher_task, 10, LV_TASK_PRIO_MID, &initial_run);
+}
 
 static void setup_styles(void)
 {
@@ -147,28 +158,23 @@ static void setup_titlebar(void)
 	lv_obj_set_size(box_titlebar, LV_HOR_RES, TITLEBAR_HEIGHT);
 
 	/* Menu button */
-	lv_obj_t *btn_menu = lv_btn_create(box_titlebar, NULL);
-	lv_obj_set_size(btn_menu, TITLEBAR_HEIGHT, TITLEBAR_HEIGHT);
-	lv_btn_set_checkable(btn_menu, true);
+	lv_obj_t *btn_menu = lv_btn_create(lv_scr_act(), NULL);
 	lv_theme_apply(btn_menu, (lv_theme_style_t)CUSTOM_THEME_TITLEBAR_BTN);
-	// lv_obj_set_style_local_value_str(btn_menu, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_SYMBOL_POWER);
-	// lv_obj_set_event_cb(btn_menu, main_screen_btn_menu_event_cb);
+
+	const lv_coord_t _corner_radius = lv_obj_get_style_radius(btn_menu, LV_OBJ_PART_MAIN); // Get corner radius of button from style
+	const lv_coord_t _button_width = CENTER_AREA_POSITION.x + 40;						   // Button should start from the left edge and reach into the center area
+
+	lv_obj_set_size(btn_menu, _button_width + _corner_radius, TITLEBAR_BUTTON_HEIGHT);
+	lv_obj_set_pos(btn_menu, -_corner_radius, 0);
+
+	lv_btn_set_checkable(btn_menu, false);
+	lv_btn_set_layout(btn_menu, LV_LAYOUT_OFF); // This allows us to align the label of the button manually
 
 	lv_obj_t *lbl_btn_menu = lv_label_create(btn_menu, NULL);
 	lv_label_set_text(lbl_btn_menu, LV_SYMBOL_BARS);
-	lv_obj_set_pos(btn_menu, 5, 0);
-
-	/* Button to enable solder iron */
-	lv_obj_t *btn_en = lv_btn_create(box_titlebar, NULL);
-	lv_obj_set_size(btn_en, TITLEBAR_HEIGHT, TITLEBAR_HEIGHT);
-	lv_btn_set_checkable(btn_en, true);
-	lv_theme_apply(btn_en, (lv_theme_style_t)CUSTOM_THEME_TITLEBAR_BTN);
-	// lv_obj_set_style_local_value_str(btn_en, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_SYMBOL_POWER);
-	lv_obj_set_event_cb(btn_en, main_screen_btn_en_event_cb);
-
-	lv_obj_t *lbl_btn_en = lv_label_create(btn_en, NULL);
-	lv_label_set_text(lbl_btn_en, LV_SYMBOL_POWER);
-	lv_obj_align_x(btn_en, btn_menu, LV_ALIGN_OUT_RIGHT_MID, 5);
+	lv_obj_align(lbl_btn_menu, NULL, LV_ALIGN_CENTER, (_corner_radius / 2), 0);
+	lv_obj_set_event_cb(btn_menu, switch_to_menu_event_cb);
+	lv_obj_set_ext_click_area(btn_menu, 0, 20, 0, 20);
 }
 
 static void setup_preset_drawer(void)
@@ -184,20 +190,18 @@ static void setup_preset_drawer(void)
 	lv_obj_set_size(box_presets, DRAWER_WIDTH + CORNER_RADIUS, DRAWER_HEIGHT); // Add corner radius to width to hide right corner
 	lv_obj_align(box_presets, NULL, LV_ALIGN_IN_RIGHT_MID, CORNER_RADIUS, 0);
 
-	/* Create round corners using object mask */
+	/* Create round corners using object mask - this is needed because otherwise the pressed buttons would bleed over the round corners */
 	lv_obj_t *om = lv_objmask_create(box_presets, NULL);
 	lv_obj_set_size(om, DRAWER_WIDTH + CORNER_RADIUS, DRAWER_HEIGHT); // Add corner radius to width to hide right corner
 	lv_obj_align(om, NULL, LV_ALIGN_IN_LEFT_MID, 0, 0);
 
 	lv_area_t mask_rect;
-	lv_coord_t mask_radius;
 	lv_draw_mask_radius_param_t mask_param;
 
 	mask_rect.x1 = 0;
 	mask_rect.y1 = 0;
 	mask_rect.x2 = DRAWER_WIDTH + CORNER_RADIUS;
 	mask_rect.y2 = DRAWER_HEIGHT;
-	// mask_radius = (lv_coord_t)lv_obj_get_style_radius(box_presets, LV_OBJ_PART_MAIN);
 	lv_draw_mask_radius_init(&mask_param, &mask_rect, CORNER_RADIUS, false);
 	lv_objmask_add_mask(om, &mask_param);
 
@@ -267,7 +271,7 @@ static void setup_main_screen(void)
 	/* Power Bar */
 	bar_power = lv_bar_create(lv_scr_act(), NULL);
 	lv_theme_apply(bar_power, (lv_theme_style_t)CUSTOM_THEME_POWER_BAR);
-	lv_obj_set_size(bar_power, POWER_BAR_WIDTH, (LV_VER_RES_MAX - TITLEBAR_HEIGHT - (2 * POWER_BAR_PADDING_VER)));
+	lv_obj_set_size(bar_power, POWER_BAR_WIDTH, (LV_VER_RES_MAX - TITLEBAR_BUTTON_HEIGHT - (2 * POWER_BAR_PADDING_VER)));
 	lv_bar_set_anim_time(bar_power, 500);
 	lv_bar_set_range(bar_power, 0, 20);
 	lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
@@ -285,10 +289,10 @@ static void setup_main_screen(void)
 	lbl_iron_id = lv_label_create(box_center, NULL);
 	lv_label_set_long_mode(lbl_iron_id, LV_LABEL_LONG_CROP);
 	lv_label_set_align(lbl_iron_id, LV_LABEL_ALIGN_CENTER);
-	lv_obj_set_size(lbl_iron_id, CENTER_AREA_WIDTH, lv_font_montserrat_24.line_height);
+	lv_obj_set_size(lbl_iron_id, CENTER_AREA_WIDTH, lv_font_roboto_20.line_height);
 	lv_label_set_text(lbl_iron_id, "Iron A - T245");
 	lv_obj_align(lbl_iron_id, NULL, LV_ALIGN_IN_TOP_MID, 0, 10);
-	lv_obj_set_style_local_text_font(lbl_iron_id, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_24);
+	lv_obj_set_style_local_text_font(lbl_iron_id, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_20);
 
 	/* Box Temperature */
 	box_temperature = lv_obj_create(box_center, NULL);
@@ -336,7 +340,7 @@ static void setup_main_screen(void)
 	lv_obj_align(lbl_iron_state_title, NULL, LV_ALIGN_IN_LEFT_MID, 0, -25);
 	lv_obj_set_style_local_text_font(lbl_iron_state_title, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_40);
 	lv_obj_set_click(lbl_iron_state_title, true);
-	lv_obj_set_event_cb(lbl_iron_state_title, main_screen_btn_en_event_cb);
+	lv_obj_set_event_cb(lbl_iron_state_title, main_screen_iron_enable_event_cb);
 
 	/* Label Iron State_MSG1 */
 	lbl_iron_state_msg1 = lv_label_create(box_sleep, NULL);
@@ -360,7 +364,7 @@ static void setup_main_screen(void)
 	box_setpoint = lv_obj_create(box_center, NULL);
 	lv_obj_clean_style_list(box_setpoint, LV_OBJ_PART_MAIN);
 	lv_obj_set_size(box_setpoint, CENTER_AREA_WIDTH, 36);
-	lv_obj_align(box_setpoint, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -10);
+	lv_obj_align(box_setpoint, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -POWER_BAR_PADDING_VER); // Align with power bar
 
 	/* Temperature setpoint label */
 	lbl_setpoint = lv_label_create(box_setpoint, NULL);
@@ -430,25 +434,28 @@ LV_EVENT_CB_DECLARE(btn_dec_setpoint_event_cb)
 
 static void btn_quick_event_cb(lv_obj_t *obj, lv_event_t event)
 {
-	if (obj == btn_quick1)
+	switch (event)
 	{
-		iron_set_setpoint(350);
-	}
-	else if (obj == btn_quick2)
-	{
-		iron_set_setpoint(300);
-	}
-	else if (obj == btn_quick3)
-	{
-		iron_set_setpoint(250);
+	case LV_EVENT_CLICKED:
+		if (obj == btn_quick1)
+		{
+			iron_set_setpoint(350);
+		}
+		else if (obj == btn_quick2)
+		{
+			iron_set_setpoint(300);
+		}
+		else if (obj == btn_quick3)
+		{
+			iron_set_setpoint(250);
+		}
+		break;
+	default:
+		break;
 	}
 }
-// static void main_screen_iron_state_change_cb(iron_state_t state)
-// {
-// 	lv_label_set_text(lbl_iron_id, state_str[state]);
-// }
 
-static void main_screen_btn_en_event_cb(lv_obj_t *obj, lv_event_t event)
+static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event)
 {
 	switch (event)
 	{
@@ -457,6 +464,8 @@ static void main_screen_btn_en_event_cb(lv_obj_t *obj, lv_event_t event)
 		break;
 	case LV_EVENT_CLICKED:
 		iron_set_enable(!iron_is_enabled());
+		break;
+	default:
 		break;
 	}
 }
@@ -469,79 +478,8 @@ static void main_screen_refresher_task(struct _lv_task_t *taskh)
 	static int16_t prev_pwr;
 
 	iron_state_t new_iron_state = iron_get_state();
-	if (new_iron_state != prev_iron_state)
+	if (new_iron_state != prev_iron_state || initial_run)
 	{
-		// if(new_iron_state == IRON_STATE_ACTIVE)
-		// {
-		// 	/* Animate out sleep */
-		// 	lv_anim_t anim_out_sleep;
-		// 	lv_anim_init(&anim_out_sleep);
-		// 	lv_anim_set_var(&anim_out_sleep, box_sleep);
-		// 	lv_anim_set_time(&anim_out_sleep, ANIMATION_TIME);
-		// 	lv_anim_set_delay(&anim_out_sleep, 0);
-		// 	lv_anim_set_exec_cb(&anim_out_sleep, (lv_anim_exec_xcb_t) lv_obj_set_x);
-		// 	lv_anim_set_values(&anim_out_sleep, 0, -LV_HOR_RES_MAX);
-
-		// 	/* Animate in preset */
-		// 	lv_anim_t anim_in_preset;
-		// 	lv_anim_init(&anim_in_preset);
-		// 	lv_anim_set_var(&anim_in_preset, box_presets);
-		// 	lv_anim_set_time(&anim_in_preset, ANIMATION_TIME);
-		// 	lv_anim_set_delay(&anim_in_preset, ANIMATION_TIME);
-		// 	lv_anim_set_exec_cb(&anim_in_preset, (lv_anim_exec_xcb_t) lv_obj_set_x);
-		// 	lv_anim_set_values(&anim_in_preset, LV_HOR_RES_MAX, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH);
-
-		// 	/* Animate in main */
-		// 	lv_anim_t anim_in_active;
-		// 	lv_anim_init(&anim_in_active);
-		// 	lv_anim_set_var(&anim_in_active, box_main);
-		// 	lv_anim_set_time(&anim_in_active, ANIMATION_TIME);
-		// 	lv_anim_set_delay(&anim_in_active, ANIMATION_TIME);
-		// 	lv_anim_set_exec_cb(&anim_in_active, (lv_anim_exec_xcb_t) lv_obj_set_x);
-		// 	lv_anim_set_values(&anim_in_active, -(LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH), 0);
-
-		// 	/* Start animation */
-		// 	lv_anim_start(&anim_out_sleep);
-		// 	lv_anim_start(&anim_in_preset);
-		// 	lv_anim_start(&anim_in_active);
-
-		// }
-
-		// if(prev_iron_state == IRON_STATE_ACTIVE)
-		// {
-		// 	/* Animate out preset */
-		// 	lv_anim_t anim_out_preset;
-		// 	lv_anim_init(&anim_out_preset);
-		// 	lv_anim_set_var(&anim_out_preset, box_presets);
-		// 	lv_anim_set_time(&anim_out_preset, ANIMATION_TIME);
-		// 	lv_anim_set_delay(&anim_out_preset, 0);
-		// 	lv_anim_set_exec_cb(&anim_out_preset, (lv_anim_exec_xcb_t) lv_obj_set_x);
-		// 	lv_anim_set_values(&anim_out_preset, LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH, LV_HOR_RES_MAX);
-
-		// 	/* Animate in main */
-		// 	lv_anim_t anim_out_active;
-		// 	lv_anim_init(&anim_out_active);
-		// 	lv_anim_set_var(&anim_out_active, box_main);
-		// 	lv_anim_set_time(&anim_out_active, ANIMATION_TIME);
-		// 	lv_anim_set_delay(&anim_out_active, 0);
-		// 	lv_anim_set_exec_cb(&anim_out_active, (lv_anim_exec_xcb_t) lv_obj_set_x);
-		// 	lv_anim_set_values(&anim_out_active, 0, -(LV_HOR_RES_MAX - PRESET_DRAWER_WIDTH));
-
-		// 	/* Animate in sleep */
-		// 	lv_anim_t anim_in_sleep;
-		// 	lv_anim_init(&anim_in_sleep);
-		// 	lv_anim_set_var(&anim_in_sleep, box_sleep);
-		// 	lv_anim_set_time(&anim_in_sleep, ANIMATION_TIME);
-		// 	lv_anim_set_delay(&anim_in_sleep, ANIMATION_TIME);
-		// 	lv_anim_set_exec_cb(&anim_in_sleep, (lv_anim_exec_xcb_t) lv_obj_set_x);
-		// 	lv_anim_set_values(&anim_in_sleep, -LV_HOR_RES_MAX, 0);
-
-		// 	/* Start animation */
-		// 	lv_anim_start(&anim_out_preset);
-		// 	lv_anim_start(&anim_out_active);
-		// 	lv_anim_start(&anim_in_sleep);
-		// }
-
 		if (new_iron_state == IRON_STATE_ACTIVE)
 		{
 			lv_obj_set_hidden(box_temperature, false);
@@ -579,7 +517,7 @@ static void main_screen_refresher_task(struct _lv_task_t *taskh)
 	}
 
 	uint16_t new_temperature = iron_get_temperature();
-	if (new_temperature != prev_temperature)
+	if (new_temperature != prev_temperature || initial_run)
 	{
 		switch (new_iron_state)
 		{
@@ -590,6 +528,9 @@ static void main_screen_refresher_task(struct _lv_task_t *taskh)
 			break;
 		case IRON_STATE_ACTIVE:
 			lv_label_set_text_fmt(lbl_temperature, "%d", new_temperature);
+			break;
+		default:
+			/* No need to update anything */
 			break;
 		}
 		prev_temperature = new_temperature;
@@ -607,7 +548,7 @@ static void main_screen_refresher_task(struct _lv_task_t *taskh)
 	}
 
 	uint16_t new_setpoint = iron_get_setpoint();
-	if (new_setpoint != prev_setpoint)
+	if (new_setpoint != prev_setpoint || initial_run)
 	{
 		lv_label_set_text_fmt(lbl_setpoint, "%d°C", new_setpoint);
 		prev_setpoint = new_setpoint;
@@ -618,5 +559,24 @@ static void main_screen_refresher_task(struct _lv_task_t *taskh)
 	{
 		lv_bar_set_value(bar_power, new_pwr, LV_ANIM_OFF);
 		prev_pwr = new_pwr;
+	}
+	initial_run = false;
+}
+
+static void switch_to_menu_event_cb(lv_obj_t *obj, lv_event_t event)
+{
+	if (event == LV_EVENT_CLICKED)
+	{
+		lv_task_del(main_screen_task_handle);
+		lv_obj_del(scr_home);
+		scr_menu = create_menu_screen(return_to_home_event_cb);
+	}
+}
+static void return_to_home_event_cb(lv_obj_t *obj, lv_event_t event)
+{
+	if (event == LV_EVENT_CLICKED)
+	{
+		lv_obj_del(scr_menu);
+		create_main_screen();
 	}
 }
