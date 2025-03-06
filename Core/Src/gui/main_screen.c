@@ -12,6 +12,7 @@
 #include "../iron.h"
 #include "main_screen.h"
 #include "screen_menu.h"
+#include "buzzer.h"
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
@@ -460,9 +461,11 @@ static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event)
 	switch (event)
 	{
 	case LV_EVENT_VALUE_CHANGED:
+		Buzzer_Beep(100);
 		iron_set_enable(lv_btn_get_state(obj) == LV_BTN_STATE_CHECKED_RELEASED);
 		break;
 	case LV_EVENT_CLICKED:
+		Buzzer_Beep(100);
 		iron_set_enable(!iron_is_enabled());
 		break;
 	default:
