@@ -12,6 +12,7 @@
 #include "../iron.h"
 #include "main_screen.h"
 #include "screen_menu.h"
+#include "screen_graph.h"
 #include "buzzer.h"
 
 /* -------------------------------------------------------------------------- */
@@ -38,6 +39,7 @@ static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event);
 static void main_screen_refresher_task(struct _lv_task_t *);
 
 static void switch_to_menu_event_cb(lv_obj_t *obj, lv_event_t event);
+static void switch_to_graph_event_cb(lv_obj_t *obj, lv_event_t event);
 static void return_to_home_event_cb(lv_obj_t *obj, lv_event_t event);
 
 const char *state_str[] = {
@@ -57,6 +59,7 @@ static lv_style_t sty_lbl_unit;
 
 static lv_obj_t *scr_home;
 static lv_obj_t *scr_menu;
+static lv_obj_t *scr_graph;
 
 static lv_obj_t *box_titlebar;
 static lv_obj_t *box_presets;
@@ -176,6 +179,25 @@ static void setup_titlebar(void)
 	lv_obj_align(lbl_btn_menu, NULL, LV_ALIGN_CENTER, (_corner_radius / 2), 0);
 	lv_obj_set_event_cb(btn_menu, switch_to_menu_event_cb);
 	lv_obj_set_ext_click_area(btn_menu, 0, 20, 0, 20);
+
+	// /* Graph button */
+	// lv_obj_t *btn_graph = lv_btn_create(lv_scr_act(), NULL);
+	// lv_theme_apply(btn_graph, (lv_theme_style_t)CUSTOM_THEME_TITLEBAR_BTN);
+
+	// const lv_coord_t _graph_corner_radius = lv_obj_get_style_radius(btn_graph, LV_OBJ_PART_MAIN);		 // Get corner radius of button from style
+	// const lv_coord_t _graph_button_width = LV_HOR_RES - CENTER_AREA_POSITION.x - CENTER_AREA_WIDTH + 40; // Button should start from the left edge and reach into the center area
+
+	// lv_obj_set_size(btn_graph, _graph_button_width + _graph_corner_radius, TITLEBAR_BUTTON_HEIGHT);
+	// lv_obj_set_pos(btn_graph, CENTER_AREA_POSITION.x + CENTER_AREA_WIDTH - 40, 0);
+
+	// lv_btn_set_checkable(btn_graph, false);
+	// lv_btn_set_layout(btn_graph, LV_LAYOUT_OFF); // This allows us to align the label of the button manually
+
+	// lv_obj_t *lbl_btn_graph = lv_label_create(btn_graph, NULL);
+	// lv_label_set_text(lbl_btn_graph, LV_SYMBOL_BARS);
+	// lv_obj_align(lbl_btn_graph, NULL, LV_ALIGN_CENTER, (_corner_radius / 2), 0);
+	// lv_obj_set_event_cb(btn_graph, switch_to_graph_event_cb);
+	// lv_obj_set_ext_click_area(btn_graph, 0, 20, 0, 20);
 }
 
 static void setup_preset_drawer(void)
@@ -285,6 +307,8 @@ static void setup_main_screen(void)
 	lv_obj_set_pos(box_center, (POWER_BAR_WIDTH + POWER_BAR_PADDING_HOR), TITLEBAR_HEIGHT);
 	// lv_obj_set_style_local_border_width(box_center, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 1);
 	// lv_obj_set_style_local_border_color(box_center, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+	lv_obj_set_drag(box_center, true);
+	// lv_obj_set_drag_parent(box_center, true);
 
 	/* Label Iron Status */
 	lbl_iron_id = lv_label_create(box_center, NULL);
@@ -575,11 +599,22 @@ static void switch_to_menu_event_cb(lv_obj_t *obj, lv_event_t event)
 		scr_menu = create_menu_screen(return_to_home_event_cb);
 	}
 }
+
+static void switch_to_graph_event_cb(lv_obj_t *obj, lv_event_t event)
+{
+	if (event == LV_EVENT_CLICKED)
+	{
+		lv_task_del(main_screen_task_handle);
+		lv_obj_del(scr_home);
+		scr_graph = create_graph_screen(return_to_home_event_cb);
+	}
+}
+
 static void return_to_home_event_cb(lv_obj_t *obj, lv_event_t event)
 {
 	if (event == LV_EVENT_CLICKED)
 	{
-		lv_obj_del(scr_menu);
+		lv_obj_del(lv_scr_act());
 		create_main_screen();
 	}
 }
