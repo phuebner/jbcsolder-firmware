@@ -39,7 +39,6 @@ static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event);
 static void main_screen_refresher_task(struct _lv_task_t *);
 
 static void switch_to_menu_event_cb(lv_obj_t *obj, lv_event_t event);
-static void switch_to_graph_event_cb(lv_obj_t *obj, lv_event_t event);
 static void return_to_home_event_cb(lv_obj_t *obj, lv_event_t event);
 
 const char *state_str[] = {
@@ -59,7 +58,6 @@ static lv_style_t sty_lbl_unit;
 
 static lv_obj_t *scr_home;
 static lv_obj_t *scr_menu;
-static lv_obj_t *scr_graph;
 
 static lv_obj_t *box_titlebar;
 static lv_obj_t *box_presets;
@@ -83,7 +81,7 @@ static lv_group_t *g;
 
 static lv_task_t *main_screen_task_handle;
 static bool initial_run;
-
+lv_obj_t *tileview;
 /* Sizes */
 static const lv_coord_t TITLEBAR_HEIGHT = 35;
 static const lv_coord_t TITLEBAR_BUTTON_HEIGHT = 55;
@@ -291,23 +289,38 @@ static void setup_preset_drawer(void)
 
 static void setup_main_screen(void)
 {
+	static lv_point_t valid_pos[] = {{0, 0}, {0, 1}};
+
+	tileview = lv_tileview_create(lv_scr_act(), NULL);
+	lv_obj_set_size(tileview, LV_HOR_RES, LV_VER_RES);
+	lv_tileview_set_valid_positions(tileview, valid_pos, 2);
+	lv_tileview_set_edge_flash(tileview, true);
+	lv_obj_set_style_local_bg_opa(tileview, LV_TILEVIEW_PART_SCROLLBAR, LV_STATE_DEFAULT, 0);
+
+	lv_obj_t *tile1 = lv_obj_create(tileview, NULL);
+	lv_obj_set_size(tile1, LV_HOR_RES, LV_VER_RES);
+	lv_tileview_add_element(tileview, tile1);
+
 	/* Power Bar */
-	bar_power = lv_bar_create(lv_scr_act(), NULL);
+	bar_power = lv_bar_create(tile1, NULL);
 	lv_theme_apply(bar_power, (lv_theme_style_t)CUSTOM_THEME_POWER_BAR);
 	lv_obj_set_size(bar_power, POWER_BAR_WIDTH, (LV_VER_RES_MAX - TITLEBAR_BUTTON_HEIGHT - (2 * POWER_BAR_PADDING_VER)));
 	lv_bar_set_anim_time(bar_power, 500);
 	lv_bar_set_range(bar_power, 0, 20);
 	lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
 	lv_obj_align(bar_power, NULL, LV_ALIGN_IN_BOTTOM_LEFT, POWER_BAR_PADDING_HOR, -(POWER_BAR_PADDING_VER));
+	lv_obj_set_drag_parent(bar_power, true);
 
 	/* Box Center */
-	lv_obj_t *box_center = lv_obj_create(lv_scr_act(), NULL);
+	lv_obj_t *box_center = lv_obj_create(tile1, NULL);
 	lv_obj_clean_style_list(box_center, LV_OBJ_PART_MAIN);
 	lv_obj_set_size(box_center, CENTER_AREA_WIDTH, LV_VER_RES_MAX - TITLEBAR_HEIGHT);
 	lv_obj_set_pos(box_center, (POWER_BAR_WIDTH + POWER_BAR_PADDING_HOR), TITLEBAR_HEIGHT);
+	lv_obj_set_parent_event(box_center, true);
+	lv_obj_set_drag_parent(box_center, true);
 	// lv_obj_set_style_local_border_width(box_center, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 1);
 	// lv_obj_set_style_local_border_color(box_center, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-	lv_obj_set_drag(box_center, true);
+	// lv_obj_set_drag(box_center, true);
 	// lv_obj_set_drag_parent(box_center, true);
 
 	/* Label Iron Status */
@@ -323,6 +336,8 @@ static void setup_main_screen(void)
 	box_temperature = lv_obj_create(box_center, NULL);
 	lv_obj_set_style_local_bg_opa(box_temperature, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 0);
 	lv_obj_set_style_local_border_opa(box_temperature, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 0);
+	lv_obj_set_parent_event(box_temperature, true);
+	lv_obj_set_drag_parent(box_temperature, true);
 
 	/* Current temperature display */
 	lbl_temperature = lv_label_create(box_temperature, NULL);
@@ -355,6 +370,8 @@ static void setup_main_screen(void)
 	lv_obj_clean_style_list(box_sleep, LV_OBJ_PART_MAIN);
 	lv_obj_set_size(box_sleep, CENTER_AREA_WIDTH, 120);
 	lv_obj_align(box_sleep, NULL, LV_ALIGN_IN_TOP_MID, 0, 37);
+	lv_obj_set_parent_event(box_sleep, true);
+	lv_obj_set_drag_parent(box_sleep, true);
 
 	/* Label Iron State Title */
 	lbl_iron_state_title = lv_label_create(box_sleep, NULL);
@@ -366,7 +383,7 @@ static void setup_main_screen(void)
 	lv_obj_set_style_local_text_font(lbl_iron_state_title, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_40);
 	lv_obj_set_click(lbl_iron_state_title, true);
 	lv_obj_set_event_cb(lbl_iron_state_title, main_screen_iron_enable_event_cb);
-
+	lv_obj_set_drag_parent(lbl_iron_state_title, true);
 	/* Label Iron State_MSG1 */
 	lbl_iron_state_msg1 = lv_label_create(box_sleep, NULL);
 	lv_label_set_long_mode(lbl_iron_state_msg1, LV_LABEL_LONG_CROP);
@@ -375,7 +392,7 @@ static void setup_main_screen(void)
 	lv_label_set_text(lbl_iron_state_msg1, "");
 	lv_obj_align(lbl_iron_state_msg1, NULL, LV_ALIGN_IN_LEFT_MID, 0, 10);
 	lv_obj_set_style_local_text_font(lbl_iron_state_msg1, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_18);
-
+	lv_obj_set_drag_parent(lbl_iron_state_msg1, true);
 	/* Label Iron State_MSG2 */
 	lbl_iron_state_msg2 = lv_label_create(box_sleep, NULL);
 	lv_label_set_long_mode(lbl_iron_state_msg2, LV_LABEL_LONG_CROP);
@@ -384,7 +401,7 @@ static void setup_main_screen(void)
 	lv_label_set_text(lbl_iron_state_msg2, "");
 	lv_obj_align(lbl_iron_state_msg2, NULL, LV_ALIGN_IN_LEFT_MID, 0, 35);
 	lv_obj_set_style_local_text_font(lbl_iron_state_msg2, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_roboto_18);
-
+	lv_obj_set_drag_parent(lbl_iron_state_msg2, true);
 	/* Box Setpoint */
 	box_setpoint = lv_obj_create(box_center, NULL);
 	lv_obj_clean_style_list(box_setpoint, LV_OBJ_PART_MAIN);
@@ -399,6 +416,8 @@ static void setup_main_screen(void)
 	lv_label_set_align(lbl_setpoint, LV_LABEL_ALIGN_CENTER);
 	lv_label_set_text(lbl_setpoint, "200°C");
 	lv_obj_align(lbl_setpoint, NULL, LV_ALIGN_CENTER, 0, 0);
+	lv_obj_set_parent_event(box_setpoint, true);
+	lv_obj_set_drag_parent(box_setpoint, true);
 
 	/* Button to increase setpoint */
 	lv_obj_t *btn_inc_setpoint = lv_btn_create(box_setpoint, NULL);
@@ -417,6 +436,10 @@ static void setup_main_screen(void)
 	// lv_obj_set_style_local_text_font(btn_dec_setpoint, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_24);
 	lv_obj_set_style_local_value_str(btn_dec_setpoint, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_SYMBOL_MINUS);
 	lv_obj_set_event_cb(btn_dec_setpoint, btn_dec_setpoint_event_cb);
+
+	lv_obj_t *tile2 = create_graph_screen(tileview);
+	lv_obj_set_size(tile2, LV_HOR_RES, LV_VER_RES);
+	lv_tileview_add_element(tileview, tile2);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -597,16 +620,6 @@ static void switch_to_menu_event_cb(lv_obj_t *obj, lv_event_t event)
 		lv_task_del(main_screen_task_handle);
 		lv_obj_del(scr_home);
 		scr_menu = create_menu_screen(return_to_home_event_cb);
-	}
-}
-
-static void switch_to_graph_event_cb(lv_obj_t *obj, lv_event_t event)
-{
-	if (event == LV_EVENT_CLICKED)
-	{
-		lv_task_del(main_screen_task_handle);
-		lv_obj_del(scr_home);
-		scr_graph = create_graph_screen(return_to_home_event_cb);
 	}
 }
 

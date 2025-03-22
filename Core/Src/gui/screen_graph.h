@@ -3,6 +3,6 @@
 
 #include "lvgl.h"
 
-lv_obj_t *create_graph_screen(lv_event_cb_t return_to_home_event_cb);
+lv_obj_t *create_graph_screen(lv_obj_t *parent);
 
 #endif /* GUI_SCREEN_GRAPH */

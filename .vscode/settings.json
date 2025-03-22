@@ -8,6 +8,8 @@
         "stdbool.h": "c",
         "iron.h": "c",
         "main.h": "c",
-        "buzzer.h": "c"
+        "buzzer.h": "c",
+        "list": "c",
+        "*.tcc": "c"
     }
 }
