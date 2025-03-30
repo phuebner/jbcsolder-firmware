@@ -1,7 +1,7 @@
-#ifndef FT6236U_FT6236U
-#define FT6236U_FT6236U
-#include "main.h"
+#ifndef FT6236U
+#define FT6236U
 
+#include <stdint.h>
 typedef enum
 {
 	TOUCH_EVENT_PRESSED = 0,
@@ -19,10 +19,10 @@ typedef struct
 	uint8_t area;
 } touch_event_t;
 
-void touch_init();
+void ft6236_touch_io_init();
 
-touch_event_t touch_get_last_event();
+touch_event_t ft6236_touch_get_last_event();
 
-void touch_interrupt_handler();
+void ft6236_touch_interrupt_handler();
 
-#endif /* FT6236U_FT6236U */
+#endif /* FT6236U */

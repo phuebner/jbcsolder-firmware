@@ -30,10 +30,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "delay.h"
-// #include "drv/ili9341v/ili9341v.h"
-// #include "drv/lcd.h"
 #include "drv/lv_port_disp.h"
-// #include "drv/ft6236u/ft6236u.h"
+#include "drv/lv_port_indev_touchscreen.h"
+#include "drv/lv_port_indev_encoder.h"
+
 #include "iron.h"
 
 #include "lvgl.h"
@@ -41,7 +41,7 @@
 // #include "hal_lvgl_encoder.h"
 
 // #include "lv_demo_widget.h"
-// #include "gui/main_screen.h"
+#include "gui/main_screen.h"
 #include "usbd_cdc_if.h"
 #include "buzzer.h"
 /* USER CODE END Includes */
@@ -126,12 +126,10 @@ int main(void)
   iron_init();
 
   // Initialize LVGL
-  lv_init();
-  // Initialize the display hardware for LVGL
-  lv_port_disp_init();
-
-  // display_init();
-  // touch_init();
+  lv_init();                        // Initialize LVGL
+  lv_port_disp_init();              // Initialize the display hardware for LVGL
+  lv_port_indev_touchscreen_init(); // Initialize the touchscreen hardware for LVGL
+  lv_port_indev_encoder_init();     // Initialize the encoder hardware for LVGL
 
   // HAL_Delay(10);
   // display_fill(0, 0, DISP_HOR, DISP_VER, 0xFFFF, NULL);
@@ -147,9 +145,9 @@ int main(void)
   HAL_Delay(10);
 
   //  lv_demo_widgets();
-  // gui_init();
+  gui_init();
   /* USER CODE END 2 */
-  ui_init();
+  // ui_init();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint8_t buffer[] = "Hello, World!\r\n";
@@ -175,13 +173,13 @@ void ui_init()
 
   /* set screen background to white */
   lv_obj_t *scr = lv_screen_active();
-  lv_obj_set_style_bg_color(scr, lv_color_make(0xFF, 0x00, 0x00), 0);
+  lv_obj_set_style_bg_color(scr, lv_color_make(0x00, 0x00, 0xFF), 0);
   // lv_obj_set_style_bg_opa(scr, LV_OPA_100, 0);
 
-  // lv_obj_t *block = lv_obj_create(scr);
-  // lv_obj_set_size(block, 30, 60); // Set the size
-  // lv_obj_set_pos(block, 30, 10);  // Set the position of the object
-  // lv_obj_set_style_bg_color(block, lv_color_make(0x00, 0x00, 0xFF), 0);
+  lv_obj_t *block = lv_obj_create(scr);
+  lv_obj_set_size(block, 30, 60); // Set the size
+  lv_obj_set_pos(block, 30, 10);  // Set the position of the object
+  lv_obj_set_style_bg_color(block, lv_color_make(0xFF, 0x00, 0x00), 0);
 
   /* create label */
   obj = lv_label_create(scr);
