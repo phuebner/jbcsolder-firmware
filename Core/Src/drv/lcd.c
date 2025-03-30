@@ -3,7 +3,7 @@
  * @file disp.c
  *
  */
-
+#if 0
 /*********************
  *      INCLUDES
  *********************/
@@ -310,3 +310,5 @@ static void Error_Handler(void)
 	{
 	}
 }
+
+#endif

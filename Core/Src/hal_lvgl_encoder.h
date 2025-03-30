@@ -5,12 +5,12 @@
  *      Author: patrick
  */
 
-#ifndef SRC_HAL_LVGL_ENCODER_H_
-#define SRC_HAL_LVGL_ENCODER_H_
+// #ifndef SRC_HAL_LVGL_ENCODER_H_
+// #define SRC_HAL_LVGL_ENCODER_H_
 
-#include "lvgl.h"
+// #include "lvgl.h"
 
-void hal_lvgl_encoder_init();
+// void hal_lvgl_encoder_init();
 
-extern lv_indev_t *enc_indev;
-#endif /* SRC_HAL_LVGL_ENCODER_H_ */
+// extern lv_indev_t *enc_indev;
+// #endif /* SRC_HAL_LVGL_ENCODER_H_ */

@@ -5,9 +5,9 @@
  *      Author: patrick
  */
 
-#ifndef SRC_HAL_LVGL_TOUCH_H_
-#define SRC_HAL_LVGL_TOUCH_H_
+// #ifndef HAL_LVGL_TOUCH
+// #define HAL_LVGL_TOUCH
 
-void hal_lvgl_touch_init();
+// void hal_lvgl_touch_init();
 
-#endif /* SRC_HAL_LVGL_TOUCH_H_ */
+// #endif /* HAL_LVGL_TOUCH */

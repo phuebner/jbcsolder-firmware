@@ -1,3 +1,5 @@
+
+#if 0
 #include "stm32f7xx_hal.h"
 #include "ili9341v.h"
 
@@ -36,8 +38,7 @@
 #define DISPLAY_MEMORY_BASE 0x60000000
 #define DISPLAY_MEMORY_PIN 20
 
-
-#define LCD_REG (*((__IO uint8_t *) ((uint32_t)(DISPLAY_MEMORY_BASE))))
+#define LCD_REG (*((__IO uint8_t *)((uint32_t)(DISPLAY_MEMORY_BASE))))
 #define LCD_RAM (*((__IO uint8_t *)((uint32_t)(DISPLAY_MEMORY_BASE | (1 << DISPLAY_MEMORY_PIN)))))
 #if 0
 #define FIX_REV1(X) ((X & 0xFC) | ((X >> 1) & 0x01) | ((X << 1) & 0x02))
@@ -64,11 +65,12 @@ typedef struct
   void (*user_transfer_complete_callback)(void);
 } Display_Operation;
 
-typedef enum {
-	VERTICAL,
-	HORIZONTAL,
-	VERTICAL_180,
-	HORIZONTAL_180,
+typedef enum
+{
+  VERTICAL,
+  HORIZONTAL,
+  VERTICAL_180,
+  HORIZONTAL_180,
 } screen_rotation_t;
 
 DMA_HandleTypeDef dma_handle;
@@ -116,8 +118,8 @@ void dma_transfer_complete(DMA_HandleTypeDef *dmah)
   else
   {
     //    free_lock(&transfer_lock);
-	  if(current_operation.user_transfer_complete_callback != NULL)
-		  current_operation.user_transfer_complete_callback();
+    if (current_operation.user_transfer_complete_callback != NULL)
+      current_operation.user_transfer_complete_callback();
   }
 }
 
@@ -166,121 +168,121 @@ void init_dma(void)
 
 void display_init(void)
 {
-	//  if(false == get_lock(&transfer_lock)){
-	//    Throw(GD_EXCEPTION_LOCK_NOT_FREE);
-	//  }
+  //  if(false == get_lock(&transfer_lock)){
+  //    Throw(GD_EXCEPTION_LOCK_NOT_FREE);
+  //  }
 
-	/* HW reset of display */
-	HAL_Delay(20); // Allows display to start up.
+  /* HW reset of display */
+  HAL_Delay(20); // Allows display to start up.
 
-	/* Software reset */
-	COMMAND(ILI9341_RESET);
-	HAL_Delay(120);
+  /* Software reset */
+  COMMAND(ILI9341_RESET);
+  HAL_Delay(120);
 
-	//************* Start Initial Sequence **********
-	COMMAND(0xCF);
-	DATA(0x00);
-	DATA(0xAA);
-	DATA(0XE0);
-	COMMAND(0xED);
-	DATA(0x67);
-	DATA(0x03);
-	DATA(0X12);
-	DATA(0X81);
-	COMMAND(0xE8);
-	DATA(0x8A);
-	DATA(0x01);
-	DATA(0x78);
-	COMMAND(0xCB);
-	DATA(0x39);
-	DATA(0x2C);
-	DATA(0x00);
-	DATA(0x34);
-	DATA(0x02);
-	COMMAND(0xF7);
-	DATA(0x20);
-	COMMAND(0xEA);
-	DATA(0x00);
-	DATA(0x00);
-	COMMAND(0xC0); //Power control
-	DATA(0x23); //VRH[5:0]
-	COMMAND(0xC1); //Power control
-	DATA(0x11); //SAP[2:0];BT[3:0]
-	COMMAND(0xC5); //VCM control
-	DATA(0x43);
-	DATA(0x4c);
-	COMMAND(0xC7); //VCM control2
-	DATA(0xA0);
+  //************* Start Initial Sequence **********
+  COMMAND(0xCF);
+  DATA(0x00);
+  DATA(0xAA);
+  DATA(0XE0);
+  COMMAND(0xED);
+  DATA(0x67);
+  DATA(0x03);
+  DATA(0X12);
+  DATA(0X81);
+  COMMAND(0xE8);
+  DATA(0x8A);
+  DATA(0x01);
+  DATA(0x78);
+  COMMAND(0xCB);
+  DATA(0x39);
+  DATA(0x2C);
+  DATA(0x00);
+  DATA(0x34);
+  DATA(0x02);
+  COMMAND(0xF7);
+  DATA(0x20);
+  COMMAND(0xEA);
+  DATA(0x00);
+  DATA(0x00);
+  COMMAND(0xC0); // Power control
+  DATA(0x23);    // VRH[5:0]
+  COMMAND(0xC1); // Power control
+  DATA(0x11);    // SAP[2:0];BT[3:0]
+  COMMAND(0xC5); // VCM control
+  DATA(0x43);
+  DATA(0x4c);
+  COMMAND(0xC7); // VCM control2
+  DATA(0xA0);
 
-	COMMAND(0x36); // Memory Access Control / Display rotation
+  COMMAND(0x36); // Memory Access Control / Display rotation
 #if TFT_HOR_RES < TFT_VER_RES
-	#ifdef TFT_FLIP
-		DATA(0x48); //Vertical
-	#else
-		DATA(0x88); //Vertical flip
-	#endif
+#ifdef TFT_FLIP
+  DATA(0x48); // Vertical
 #else
-	#ifdef TFT_FLIP
-		DATA(0x28); //Horizontal
-	#else
-		DATA(0xE8); //Horizontal flip
-	#endif
+  DATA(0x88); // Vertical flip
+#endif
+#else
+#ifdef TFT_FLIP
+  DATA(0x28); // Horizontal
+#else
+  DATA(0xE8); // Horizontal flip
+#endif
 #endif
 
-	COMMAND(0x3A); // Memory Access Control
-	DATA(0x05);
-	COMMAND(0xB6); //Set Gamma
-	DATA(0x0A);
-	DATA(0x02);
-	COMMAND(0xF2); // 3Gamma Function Disable
-	DATA(0x00);
-	COMMAND(0x26); //Gamma curve selected
-	DATA(0x01);
+  COMMAND(0x3A); // Memory Access Control
+  DATA(0x05);
+  COMMAND(0xB6); // Set Gamma
+  DATA(0x0A);
+  DATA(0x02);
+  COMMAND(0xF2); // 3Gamma Function Disable
+  DATA(0x00);
+  COMMAND(0x26); // Gamma curve selected
+  DATA(0x01);
 
-	/* GAMMA */
-	COMMAND(0xE0);
-	DATA(0x1f); //p1 //0f
-	DATA(0x36); //p2 //30
-	DATA(0x36); //p3
-	DATA(0x3A); //p4
-	DATA(0x0C); //p5
-	DATA(0x05); //p6
-	DATA(0x4F); //p7
-	DATA(0x87); //p8
-	DATA(0x3C); //p9
-	DATA(0x08); //p10
-	DATA(0x11); //p11
-	DATA(0x35); //p12
-	DATA(0x19); //p13
-	DATA(0x13); //p14
-	DATA(0x00); //p15
-	COMMAND(0xE1);
-	DATA(0x00); //p1
-	DATA(0x09); //p2
-	DATA(0x09); //p3
-	DATA(0x05); //p4
-	DATA(0x13); //p5
-	DATA(0x0A); //p6
-	DATA(0x30); //p7
-	DATA(0x78); //p8
-	DATA(0x43); //p9
-	DATA(0x07); //p10
-	DATA(0x0E); //p11
-	DATA(0x0A); //p12
-	DATA(0x26); //p13
-	DATA(0x2C); //p14
-	DATA(0x1f); //p15
+  /* GAMMA */
+  COMMAND(0xE0);
+  DATA(0x1f); // p1 //0f
+  DATA(0x36); // p2 //30
+  DATA(0x36); // p3
+  DATA(0x3A); // p4
+  DATA(0x0C); // p5
+  DATA(0x05); // p6
+  DATA(0x4F); // p7
+  DATA(0x87); // p8
+  DATA(0x3C); // p9
+  DATA(0x08); // p10
+  DATA(0x11); // p11
+  DATA(0x35); // p12
+  DATA(0x19); // p13
+  DATA(0x13); // p14
+  DATA(0x00); // p15
+  COMMAND(0xE1);
+  DATA(0x00); // p1
+  DATA(0x09); // p2
+  DATA(0x09); // p3
+  DATA(0x05); // p4
+  DATA(0x13); // p5
+  DATA(0x0A); // p6
+  DATA(0x30); // p7
+  DATA(0x78); // p8
+  DATA(0x43); // p9
+  DATA(0x07); // p10
+  DATA(0x0E); // p11
+  DATA(0x0A); // p12
+  DATA(0x26); // p13
+  DATA(0x2C); // p14
+  DATA(0x1f); // p15
 
-	COMMAND(0x11); //Exit Sleep
-	HAL_Delay(120);
-//	COMMAND(0x13); //Normal display mode
-//	HAL_Delay(120);
-//	COMMAND(0x21);
-	COMMAND(0x29); //Display on
+  COMMAND(0x11); // Exit Sleep
+  HAL_Delay(120);
+  //	COMMAND(0x13); //Normal display mode
+  //	HAL_Delay(120);
+  //	COMMAND(0x21);
+  COMMAND(0x29); // Display on
 
-	HAL_Delay(50);
+  HAL_Delay(50);
 
-	init_dma();
+  init_dma();
 
   //  free_lock(&transfer_lock);
 }
@@ -362,3 +364,5 @@ void DMA2_Stream0_IRQHandler(void)
   /* Check the interrupt and clear flag */
   HAL_DMA_IRQHandler(&dma_handle);
 }
+
+#endif

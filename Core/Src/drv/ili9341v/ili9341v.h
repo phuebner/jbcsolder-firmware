@@ -5,8 +5,10 @@
  *      Author: patrick
  */
 
-#ifndef ILI9341V_ILI9341V
-#define ILI9341V_ILI9341V
+#ifndef ILI9341V
+#define ILI9341V
+
+#if 0
 
 #ifdef __cplusplus
 extern "C"
@@ -31,4 +33,5 @@ extern "C"
 }
 #endif
 
-#endif /* ILI9341V_ILI9341V */
+#endif
+#endif /* ILI9341V */

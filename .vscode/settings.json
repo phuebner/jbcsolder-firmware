@@ -10,6 +10,8 @@
         "main.h": "c",
         "buzzer.h": "c",
         "list": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "lv_demo_widget.h": "c",
+        "lv_lcd_generic_mipi.h": "c"
     }
 }

@@ -3,9 +3,10 @@
  *
  */
 
-#ifndef DRV_LCD
-#define DRV_LCD
+#ifndef LCD
+#define LCD
 
+#if 0
 /*********************
  *      INCLUDES
  *********************/
@@ -31,4 +32,5 @@ void tft_init(void);
  *      MACROS
  **********************/
 
-#endif /* DRV_LCD */
+#endif
+#endif /* LCD */
