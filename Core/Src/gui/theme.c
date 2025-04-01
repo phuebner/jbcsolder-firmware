@@ -13,7 +13,8 @@
 // /*                                   INCLUDE                                  */
 // /* -------------------------------------------------------------------------- */
 
-// #include "theme.h"
+#include "theme.h"
+#include "lvgl.h"
 
 // /* -------------------------------------------------------------------------- */
 // /*                              STATIC PROTOTYPES                             */
@@ -39,43 +40,38 @@
 // /*                              GLOBAL FUNCTIONS                              */
 // /* -------------------------------------------------------------------------- */
 
-// /**
-//  * Initialize the default
-//  * @param color_primary the primary color of the theme
-//  * @param color_secondary the secondary color for the theme
-//  * @param flags ORed flags starting with `LV_THEME_DEF_FLAG_...`
-//  * @param font_small pointer to a small font
-//  * @param font_normal pointer to a normal font
-//  * @param font_subtitle pointer to a large font
-//  * @param font_title pointer to a extra large font
-//  * @return a pointer to reference this theme later
-//  */
-// // lv_theme_t * theme_init(lv_color_t color_primary, lv_color_t color_secondary, uint32_t flags,
-// //                                     const lv_font_t * font_small, const lv_font_t * font_normal, const lv_font_t * font_subtitle,
-// //                                     const lv_font_t * font_title)
-// lv_theme_t *theme_init()
-// {
-//     /*Initialize styles for the new theme*/
-//     styles_init();
+void theme_init()
+{
+    lv_display_t *display = lv_disp_get_default();
+    lv_theme_t *th = lv_theme_default_init(display,       // Use DPI, size, etc. from this display
+                                           COLOR_PRIMARY, // Primary and secondary palette colors
+                                           COLOR_SECONDARY,
+                                           false, // Dark theme?  False = light theme.
+                                           &lv_font_montserrat_14);
 
-//     /*Get the current theme (e.g. material). It will be the base of the custom theme.*/
-//     lv_theme_t *base_theme = lv_theme_get_act();
+    lv_display_set_theme(display, th); /* Assign theme to display */
 
-//     /*Initialize a custom theme*/
-//     lv_theme_copy(&custom_theme, base_theme);             /*Initialize the custom theme from the base theme*/
-//     lv_theme_set_apply_cb(&custom_theme, theme_apply_cb); /*Set a custom theme apply callback*/
-//     lv_theme_set_base(&custom_theme, base_theme);         /*Set the base theme of the csutom theme*/
+    /*Initialize styles for the new theme*/
+    // styles_init();
 
-//     custom_theme.color_primary = COLOR_PRIMARY;
-//     // custom_theme.color_secondary = color_secondary;
-//     // custom_theme.font_small = font_small;
-//     // custom_theme.font_normal = font_normal;
-//     // custom_theme.font_subtitle = font_subtitle;
-//     // custom_theme.font_title = font_title;
-//     // custom_theme.flags = flags;
+    // /* Get the current theme (e.g. material). It will be the base of the custom theme. */
+    // lv_theme_t *default_theme = lv_theme_get_act();
 
-//     return &custom_theme;
-// }
+    // /* Initialize a custom theme */
+    // lv_theme_copy(&custom_theme, default_theme);          // Initialize the custom theme from the base theme
+    // lv_theme_set_apply_cb(&custom_theme, theme_apply_cb); // Set a custom theme apply callback
+    // lv_theme_set_base(&custom_theme, default_theme);      // Set the base theme of the csutom theme
+
+    // custom_theme.color_primary = COLOR_PRIMARY;
+    // custom_theme.color_secondary = color_secondary;
+    // custom_theme.font_small = font_small;
+    // custom_theme.font_normal = font_normal;
+    // custom_theme.font_subtitle = font_subtitle;
+    // custom_theme.font_title = font_title;
+    // custom_theme.flags = flags;
+
+    // return &custom_theme;
+}
 
 // /* -------------------------------------------------------------------------- */
 // /*                              STATIC FUNCTIONS                              */

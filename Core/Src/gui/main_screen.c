@@ -14,6 +14,8 @@
 #include "screen_menu.h"
 #include "screen_graph.h"
 #include "buzzer.h"
+#include "components/titlebar.h"
+#include "components/titlebar_button.h"
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
@@ -84,7 +86,6 @@ static bool initial_run;
 lv_obj_t *tileview;
 /* Sizes */
 static const lv_coord_t TITLEBAR_HEIGHT = 35;
-static const lv_coord_t TITLEBAR_BUTTON_HEIGHT = 55;
 
 static const lv_coord_t DRAWER_WIDTH = 65;
 static const lv_coord_t DRAWER_PADDING_VER = 14;
@@ -107,7 +108,7 @@ static const lv_point_t CENTER_AREA_POSITION = {x : POWER_BAR_WIDTH + POWER_BAR_
 void gui_init(void)
 {
 
-    // lv_theme_t *theme = theme_init();
+    theme_init();
     // lv_theme_set_act(theme);
     setup_styles();
 
@@ -155,28 +156,11 @@ static void setup_encoder_target(void)
 
 static void setup_titlebar(void)
 {
-    box_titlebar = lv_obj_create(lv_scr_act());
-    // lv_theme_apply(box_titlebar, (lv_theme_style_t)CUSTOM_THEME_TITLE_BG);
-    lv_obj_set_size(box_titlebar, LV_HOR_RES, TITLEBAR_HEIGHT);
+    box_titlebar = titlebar_create(lv_scr_act());
 
     /* Menu button */
-    lv_obj_t *btn_menu = lv_btn_create(lv_scr_act());
-    // lv_theme_apply(btn_menu, (lv_theme_style_t)CUSTOM_THEME_TITLEBAR_BTN);
-
-    const lv_coord_t _corner_radius = lv_obj_get_style_radius(btn_menu, LV_PART_MAIN); // Get corner radius of button from style
-    const lv_coord_t _button_width = CENTER_AREA_POSITION.x + 40;                      // Button should start from the left edge and reach into the center area
-
-    lv_obj_set_size(btn_menu, _button_width + _corner_radius, TITLEBAR_BUTTON_HEIGHT);
-    lv_obj_set_pos(btn_menu, -_corner_radius, 0);
-
-    // lv_btn_set_checkable(btn_menu, false);
-    // lv_btn_set_layout(btn_menu, LV_LAYOUT_OFF); // This allows us to align the label of the button manually
-
-    lv_obj_t *lbl_btn_menu = lv_label_create(btn_menu);
-    lv_label_set_text(lbl_btn_menu, LV_SYMBOL_BARS);
-    lv_obj_align(lbl_btn_menu, LV_ALIGN_CENTER, (_corner_radius / 2), 0);
+    lv_obj_t *btn_menu = titlebar_button_create(lv_scr_act());
     // lv_obj_set_event_cb(btn_menu, switch_to_menu_event_cb);
-    // lv_obj_set_ext_click_area(btn_menu, 0, 20, 0, 20);
 
     // /* Graph button */
     // lv_obj_t *btn_graph = lv_btn_create(lv_scr_act(), NULL);
