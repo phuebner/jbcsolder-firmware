@@ -24,7 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "lvgl.h"
-#include "drv/ft6236u/ft6236u.h"
+#include "ft6236u.h"
 #include "iron.h"
 /* USER CODE END Includes */
 

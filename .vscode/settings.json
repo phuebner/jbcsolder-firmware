@@ -13,6 +13,11 @@
         "*.tcc": "c",
         "lv_demo_widget.h": "c",
         "lv_lcd_generic_mipi.h": "c",
-        "titlebar.h": "c"
+        "titlebar.h": "c",
+        "lv_port_indev_encoder.h": "c",
+        "lv_obj.h": "c",
+        "cstdint": "cpp",
+        "iron_hw_channel.h": "c",
+        "adc.h": "c"
     }
 }

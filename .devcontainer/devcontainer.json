@@ -28,9 +28,20 @@
 				"akiramiyakoda.cppincludeguard",
 				"dan-c-underwood.arm",
 				"bierner.markdown-preview-github-styles",
-				"zixuanwang.linkerscript"
+				"zixuanwang.linkerscript",
+				"streetsidesoftware.code-spell-checker",
+				"stackbreak.comment-divider",
+				"trond-snekvik.gnu-mapfiles"
 			]
 		}
 	},
-	"remoteUser": "ubuntu"
+	"remoteUser": "ubuntu",
+	"runArgs": [
+		"--net",
+		"host",
+		"-e",
+		"DISPLAY=${env:DISPLAY}",
+		"-v",
+		"/tmp/.X11-unix:/tmp/.X11-unix"
+	]
 }

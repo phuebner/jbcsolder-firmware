@@ -19,12 +19,25 @@ file(GLOB_RECURSE LVGL_COMMON_SOURCES CONFIGURE_DEPENDS
 
 ### FIRMWARE APPLICATION SOURCES
 file(GLOB_RECURSE FIRMWARE_APPLICATION_SOURCES CONFIGURE_DEPENDS
-    ${PROJ_PATH}/Core/Src/*.c)
+    ${PROJ_PATH}/Core/Src/*.c
+    ${PROJ_PATH}/Hardware/Devices/*.c
+    ${PROJ_PATH}/Application/*.c
+    ${PROJ_PATH}/UI/Driver/*.c
+    ${PROJ_PATH}/UI/Components/*.c
+    ${PROJ_PATH}/UI/Screens/*.c
+    ${PROJ_PATH}/UI/Themes/*.c
+    ${PROJ_PATH}/Config/*.c
+    ${PROJ_PATH}/Utilities/*.c
+)
+
 
 ### SIMULATOR SOURCES
 file(GLOB_RECURSE SIMULATOR_APPLICATION_SOURCES CONFIGURE_DEPENDS
     ${PROJ_PATH}/Simulator/*.c
-    ${PROJ_PATH}/Core/Src/gui/*.c
+    ${PROJ_PATH}/UI/Components/*.c
+    ${PROJ_PATH}/UI/Screens/*.c
+    ${PROJ_PATH}/UI/Themes/*.c
+    ${PROJ_PATH}/Utilities/*.c
 )
 
 set(FIRMWARE_SOURCES

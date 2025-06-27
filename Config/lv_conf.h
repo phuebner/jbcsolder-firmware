@@ -3,9 +3,6 @@
  * Configuration file for v9.2.2
  */
 
-#ifndef LV_CONF
-#define LV_CONF
-
 /*
  * Copy this file as `lv_conf.h`
  * 1. simply next to the `lvgl` folder
@@ -30,7 +27,7 @@
  *====================*/
 
 /*Color depth: 1 (I1), 8 (L8), 16 (RGB565), 24 (RGB888), 32 (XRGB8888)*/
-#define LV_COLOR_DEPTH 32
+#define LV_COLOR_DEPTH 16
 
 /*=========================
    STDLIB WRAPPER SETTINGS
@@ -278,7 +275,7 @@
  *-----------*/
 
 /*Enable the log module*/
-#define LV_USE_LOG 1
+#define LV_USE_LOG 0
 #if LV_USE_LOG
 
     /*How important log should be added:
@@ -292,7 +289,7 @@
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/
-    #define LV_LOG_PRINTF 1
+    #define LV_LOG_PRINTF 0
 
     /*Set callback to print the logs.
      *E.g `my_print`. The prototype should be `void my_print(lv_log_level_t level, const char * buf)`
@@ -865,7 +862,7 @@
 #define LV_USE_SNAPSHOT 0
 
 /*1: Enable system monitor component*/
-#define LV_USE_SYSMON   1
+#define LV_USE_SYSMON   0
 #if LV_USE_SYSMON
     /*Get the idle percentage. E.g. uint32_t my_get_idle(void);*/
     #define LV_SYSMON_GET_IDLE lv_timer_get_idle
@@ -965,7 +962,7 @@
  *==================*/
 
 /*Use SDL to open window on PC and handle mouse and keyboard*/
-#define LV_USE_SDL              1
+#define LV_USE_SDL              0
 #if LV_USE_SDL
     #define LV_SDL_INCLUDE_PATH     <SDL2/SDL.h>
     #define LV_SDL_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT   /*LV_DISPLAY_RENDER_MODE_DIRECT is recommended for best performance*/
@@ -1052,7 +1049,7 @@
 #define LV_USE_ST7789        0
 #define LV_USE_ST7796        0
 #define LV_USE_ILI9341       0
-#define LV_USE_GENERIC_LCD   0
+#define LV_USE_GENERIC_LCD   1
 
 #define LV_USE_GENERIC_MIPI (LV_USE_GENERIC_LCD | LV_USE_ST7735 | LV_USE_ST7789 | LV_USE_ST7796 | LV_USE_ILI9341)
 
@@ -1130,6 +1127,3 @@
 #endif /*LV_CONF_H*/
 
 #endif /*End of "Content enable"*/
-
-
-#endif /* LV_CONF */

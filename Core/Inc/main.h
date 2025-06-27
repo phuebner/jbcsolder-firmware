@@ -24,49 +24,58 @@
 #define __MAIN_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f7xx_hal.h"
 
-  /* Private includes ----------------------------------------------------------*/
-  /* USER CODE BEGIN Includes */
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 
-  /* USER CODE END Includes */
+/* USER CODE END Includes */
 
-  /* Exported types ------------------------------------------------------------*/
-  /* USER CODE BEGIN ET */
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
 
-  /* USER CODE END ET */
+/* USER CODE END ET */
 
-  /* Exported constants --------------------------------------------------------*/
-  /* USER CODE BEGIN EC */
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
 
-  /* USER CODE END EC */
+/* USER CODE END EC */
 
-  /* Exported macro ------------------------------------------------------------*/
-  /* USER CODE BEGIN EM */
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
 
-  /* USER CODE END EM */
+/* USER CODE END EM */
 
-  /* Exported functions prototypes ---------------------------------------------*/
-  void Error_Handler(void);
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define ADC_CURRENT_Pin GPIO_PIN_0
+#define ADC_CURRENT_GPIO_Port GPIOC
+#define ADC_ID1_Pin GPIO_PIN_1
+#define ADC_ID1_GPIO_Port GPIOC
+#define ADC_ID2_Pin GPIO_PIN_2
+#define ADC_ID2_GPIO_Port GPIOC
 #define BUTTON_ENC_Pin GPIO_PIN_0
 #define BUTTON_ENC_GPIO_Port GPIOA
 #define ADC_TCA_IN_Pin GPIO_PIN_1
 #define ADC_TCA_IN_GPIO_Port GPIOA
+#define ADC_TCB_IN_Pin GPIO_PIN_2
+#define ADC_TCB_IN_GPIO_Port GPIOA
 #define LCD_BACKLIGHT_Pin GPIO_PIN_5
 #define LCD_BACKLIGHT_GPIO_Port GPIOA
 #define TCA_AMPLIFIER_EN_Pin GPIO_PIN_7
 #define TCA_AMPLIFIER_EN_GPIO_Port GPIOA
+#define TCB_AMPLIDIER_EN_Pin GPIO_PIN_4
+#define TCB_AMPLIDIER_EN_GPIO_Port GPIOC
 #define TS_INT_Pin GPIO_PIN_2
 #define TS_INT_GPIO_Port GPIOB
 #define TS_INT_EXTI_IRQn EXTI2_IRQn
@@ -88,6 +97,8 @@ extern "C"
 #define LED_RED_GPIO_Port GPIOA
 #define HEATER_A_EN_Pin GPIO_PIN_11
 #define HEATER_A_EN_GPIO_Port GPIOC
+#define HEATER_B_EN_Pin GPIO_PIN_12
+#define HEATER_B_EN_GPIO_Port GPIOC
 #define LED_GREEN_Pin GPIO_PIN_2
 #define LED_GREEN_GPIO_Port GPIOD
 #define TS_RST_Pin GPIO_PIN_0
@@ -96,9 +107,9 @@ extern "C"
 #define ZERO_CROSS_GPIO_Port GPIOE
 #define ZERO_CROSS_EXTI_IRQn EXTI1_IRQn
 
-  /* USER CODE BEGIN Private defines */
+/* USER CODE BEGIN Private defines */
 
-  /* USER CODE END Private defines */
+/* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }

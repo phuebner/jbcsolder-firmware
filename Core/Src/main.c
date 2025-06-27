@@ -30,9 +30,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "delay.h"
-#include "drv/lv_port_disp.h"
-#include "drv/lv_port_indev_touchscreen.h"
-#include "drv/lv_port_indev_encoder.h"
+#include "lv_port_disp.h"
+#include "lv_port_indev_touchscreen.h"
+#include "lv_port_indev_encoder.h"
 
 #include "iron.h"
 
@@ -41,7 +41,7 @@
 // #include "hal_lvgl_encoder.h"
 
 // #include "lv_demo_widget.h"
-#include "gui/main_screen.h"
+#include "main_screen.h"
 #include "usbd_cdc_if.h"
 #include "buzzer.h"
 /* USER CODE END Includes */
@@ -122,6 +122,8 @@ int main(void)
   MX_TIM7_Init();
   MX_TIM1_Init();
   MX_USB_DEVICE_Init();
+  MX_ADC2_Init();
+  MX_ADC3_Init();
   /* USER CODE BEGIN 2 */
   iron_init();
 
@@ -147,7 +149,7 @@ int main(void)
   //  lv_demo_widgets();
   gui_init();
   /* USER CODE END 2 */
-  // ui_init();
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint8_t buffer[] = "Hello, World!\r\n";
@@ -165,30 +167,6 @@ int main(void)
     //    temp = iron_adc_read(&hadc1);
   }
   /* USER CODE END 3 */
-}
-
-void ui_init()
-{
-  lv_obj_t *obj;
-
-  /* set screen background to white */
-  lv_obj_t *scr = lv_screen_active();
-  lv_obj_set_style_bg_color(scr, lv_color_make(0x00, 0x00, 0xFF), 0);
-  // lv_obj_set_style_bg_opa(scr, LV_OPA_100, 0);
-
-  lv_obj_t *block = lv_obj_create(scr);
-  lv_obj_set_size(block, 30, 60); // Set the size
-  lv_obj_set_pos(block, 30, 10);  // Set the position of the object
-  lv_obj_set_style_bg_color(block, lv_color_make(0xFF, 0x00, 0x00), 0);
-
-  /* create label */
-  obj = lv_label_create(scr);
-  lv_obj_set_align(obj, LV_ALIGN_CENTER);
-  lv_obj_set_height(obj, LV_SIZE_CONTENT);
-  lv_obj_set_width(obj, LV_SIZE_CONTENT);
-  lv_obj_set_style_text_font(obj, &lv_font_montserrat_14, 0);
-  lv_obj_set_style_text_color(obj, lv_color_black(), 0);
-  lv_label_set_text(obj, "Hello World!");
 }
 
 /**

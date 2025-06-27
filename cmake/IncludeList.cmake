@@ -16,18 +16,35 @@ set(INCLUDE_DIRS_LVGL
     ${PROJ_PATH}/Drivers/lvgl/src/lv_misc
 )
 
+set(INCLUDE_DIRS_UI
+    ${PROJ_PATH}/UI
+    ${PROJ_PATH}/UI/Components
+    ${PROJ_PATH}/UI/Screens
+    ${PROJ_PATH}/UI/Themes
+)
+
+set(INCLUDE_DIRS_APPLICATION
+    ${PROJ_PATH}/Application
+)
+
 set(INCLUDE_DIRS_FIRMWARE
     ${INCLUIDE_DIRS_STM32_DRIVERS}
     ${INCLUDE_DIRS_LVGL}
+    ${PROJ_PATH}/Config
     ${PROJ_PATH}/Core/Inc
     ${PROJ_PATH}/Core/Src
-    ${PROJ_PATH}/Core/Src/gui
-    ${PROJ_PATH}/Core/Src/drv
+    ${PROJ_PATH}/Utilities
+    ${PROJ_PATH}/Hardware/Devices
+    ${PROJ_PATH}/Application
+    ${PROJ_PATH}/UI/Driver
+    ${INCLUDE_DIRS_UI}
 )
 
 set(INCLUDE_DIRS_SIMULATOR
     ${INCLUDE_DIRS_LVGL}
-    ${PROJ_PATH}/Core/Src
-    ${PROJ_PATH}/Core/Src/gui
+    ${PROJ_PATH}/Application
+    ${PROJ_PATH}/Utilities
+    ${INCLUDE_DIRS_UI}
+    ${PROJ_PATH}/UI/Driver
     ${PROJ_PATH}/Simulator
 )
