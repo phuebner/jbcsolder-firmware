@@ -1,7 +1,11 @@
 #include "titlebar.h"
+#include "iron.h"
 
 static const lv_coord_t TITLEBAR_HEIGHT = 35;
 
+static void switch_to_stand_event_cb(lv_event_t *e);
+
+extern iron_t iron_a;
 static lv_style_t sty_titlebar;
 static lv_style_t sty_titlebar_button_checked;
 
@@ -44,6 +48,17 @@ lv_obj_t *titlebar_create(lv_obj_t *parent)
     lv_obj_t *lbl_btn_sim_toggle_stand = lv_label_create(btn_sim_toggle_stand);
     lv_obj_align(lbl_btn_sim_toggle_stand, LV_ALIGN_CENTER, 0, 0);
     lv_label_set_text(lbl_btn_sim_toggle_stand, LV_SYMBOL_LOOP);
+
+    lv_obj_add_event_cb(btn_sim_toggle_stand, switch_to_stand_event_cb, LV_EVENT_CLICKED, NULL);
 #endif
     return titlebar;
 }
+
+#ifdef SIMULATOR
+static void switch_to_stand_event_cb(lv_event_t *e)
+{
+    iron_set_enable(&iron_a, !lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); // Toggle the heater state
+    // Placeholder: implement your event handling logic here
+    // For now, just print or toggle something if needed
+}
+#endif

@@ -18,6 +18,12 @@
         "lv_obj.h": "c",
         "cstdint": "cpp",
         "iron_hw_channel.h": "c",
-        "adc.h": "c"
-    }
+        "adc.h": "c",
+        "sdl.h": "c",
+        "numeric": "c",
+        "lvgl.h": "c"
+    },
+    "cSpell.words": [
+        "hadc"
+    ]
 }
