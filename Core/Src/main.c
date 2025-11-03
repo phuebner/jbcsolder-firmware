@@ -63,7 +63,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+iron_t iron_a;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

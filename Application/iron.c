@@ -4,11 +4,11 @@
  *  Created on: Dec 16, 2020
  *      Author: patrick
  */
-
 #include "iron.h"
 #include "pid.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
@@ -21,11 +21,16 @@
 #define IRON_TEMPERATURE_SMOOTHING_WINDOW 10 // Number of samples to smooth the temperature
 
 /* -------------------------------------------------------------------------- */
+/*                              TYPE DEFINITIONS                              */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
 /*                              STATIC PROTOTYPES                             */
 /* -------------------------------------------------------------------------- */
 
 static void iron_measure_temperature(iron_t *iron);
 static void iron_compute_pid(iron_t *iron);
+// static void iron_notify_observers(iron_t *iron);
 
 /* -------------------------------------------------------------------------- */
 /*                              STATIC VARIABLES                              */
@@ -39,7 +44,7 @@ static void iron_compute_pid(iron_t *iron);
  * @brief Init instance of soldering iron
  *
  */
-void iron_init(iron_t *iron, iron_drv_t *drv)
+void iron_init(iron_t *iron, iron_drv_t *drv, char *name, iron_type_t type)
 {
 	// Set hardware driver
 	iron->drv = drv;
@@ -50,7 +55,11 @@ void iron_init(iron_t *iron, iron_drv_t *drv)
 
 	// Initialize configuration
 	iron->cfg.sleep_temperature = 80;
-	iron->cfg.hibernate_delay = 12000; // 2 minutes
+	iron->cfg.hibernate_delay = 120000; // 2 minutes
+
+	// Initialize other variables
+	snprintf(iron->name, sizeof(iron->name), "%s", name);
+	iron->type = type;
 
 	iron->setpoint = 200;
 	iron->state = IRON_STATE_NOT_CONNECTED;
@@ -61,7 +70,7 @@ void iron_init(iron_t *iron, iron_drv_t *drv)
 	iron->power = 0xFFFF; // 0xFFFF means no power, 0 means full power
 	iron->pid_out = 0.0;
 
-	PIDInit(&iron->pid, 1.3, 0, 0.01,
+	PIDInit(&iron->pid, 1.5, 0.005, 0.05,
 			0.01, 0, PID_OUT_GRANULARITY, AUTOMATIC,
 			DIRECT);
 	PIDSetpointSet(&iron->pid, 0.0);
@@ -79,11 +88,14 @@ void iron_set_setpoint(iron_t *iron, uint16_t temperature)
 	// Immediately update pid setpoint if iron is active
 	if (iron->state == IRON_STATE_ACTIVE)
 		PIDSetpointSet(&iron->pid, (float)iron->setpoint);
+
+	// iron_notify_observers(iron);
 }
 
 void iron_set_enable(iron_t *iron, _Bool value)
 {
 	iron->enabled = value;
+	// iron_notify_observers(iron);
 }
 
 // void iron_set_state_change_cb(iron_state_change_cb_t cb)
@@ -100,11 +112,13 @@ uint16_t iron_get_temperature(iron_t *iron)
 
 uint16_t iron_get_setpoint(iron_t *iron)
 {
-	return (float)iron->setpoint;
+	return iron->setpoint;
 }
 
 float iron_get_power(iron_t *iron)
 {
+	if (!iron->enabled)
+		return 0.0f;
 	return iron->pid.output;
 }
 
@@ -115,7 +129,7 @@ iron_state_t iron_get_state(iron_t *iron)
 
 uint32_t iron_get_seconds_till_hibernate(iron_t *iron)
 {
-	return (iron->cfg.hibernate_delay - iron->hibernate_timer) / 100;
+	return (iron->cfg.hibernate_delay - iron->hibernate_timer) / 1000;
 }
 
 _Bool iron_is_enabled(iron_t *iron)
@@ -135,10 +149,10 @@ _Bool iron_is_sleeping(iron_t *iron)
 static void iron_measure_temperature(iron_t *iron)
 {
 	uint16_t adc_value = iron->drv->adc_read();
-	iron->temperature = (0.1906 * (float)adc_value) + 11.0;
+	iron->temperature = (0.1906f * (float)adc_value) + 11.0f;
 
-	float alpha = 1.0 / (float)IRON_TEMPERATURE_SMOOTHING_WINDOW;
-	iron->temperature_smooth = (iron->temperature * alpha + iron->temperature_smooth * (1.0 - alpha));
+	float alpha = 1.0f / (float)IRON_TEMPERATURE_SMOOTHING_WINDOW;
+	iron->temperature_smooth = (iron->temperature * alpha + iron->temperature_smooth * (1.0f - alpha));
 }
 
 static void iron_compute_pid(iron_t *iron)
@@ -166,7 +180,7 @@ void iron_control_heater(iron_t *iron)
 	// If PID output is PID_OUT_GRANULARITY, we skip no half cycles (heater on full power)
 	// Otherwise, we calculate the number of half cycles to skip based on the PID output
 	iron->heater_skip_half_cycles = iron->pid.output == 0 ? 0xFFFF : (uint16_t)(PID_OUT_GRANULARITY + 1 - iron->pid.output);
-	printf("PID Output: %f, Heater Skip Half Cycles: %d\n", iron->pid.output, iron->heater_skip_half_cycles);
+	// printf("PID Output: %f, Heater Skip Half Cycles: %d\n", iron->pid.output, iron->heater_skip_half_cycles);
 
 	// Enable or disable the amplifier based on the state
 	if (iron->state == IRON_STATE_ACTIVE || iron->state == IRON_STATE_SLEEP)
@@ -186,19 +200,27 @@ void iron_update_state(iron_t *iron)
 	iron_measure_temperature(iron);
 
 	// A large ADC value (saturation) indicates that the iron is not connected
-	if (iron->temperature > 550.0)
+	if (iron->temperature > 550.0f)
 	{
-		PIDSetpointSet(&iron->pid, 0.0);
-		iron->state = IRON_STATE_NOT_CONNECTED;
+		PIDSetpointSet(&iron->pid, 0.0f);
+		if (iron->state != IRON_STATE_NOT_CONNECTED)
+		{
+			iron->state = IRON_STATE_NOT_CONNECTED;
+			// iron_notify_observers(iron);
+		}
 		return;
 	}
 
 	// If iron is connected but not enabled set state off
 	if (iron->enabled == false)
 	{
-		PIDSetpointSet(&iron->pid, 0.0);
-		iron->state = IRON_STATE_OFF;
-		iron->hibernate_timer = 0; // Reset the hibernate timer
+		if (iron->state != IRON_STATE_OFF)
+		{
+			PIDSetpointSet(&iron->pid, 0.0f);
+			iron->state = IRON_STATE_OFF;
+			iron->hibernate_timer = 0; // Reset the hibernate timer
+									   // iron_notify_observers(iron);
+		}
 		return;
 	}
 
@@ -214,11 +236,14 @@ void iron_update_state(iron_t *iron)
 		{
 			PIDSetpointSet(&iron->pid, new_setpoint);
 			iron->state = new_state;
+			// iron_notify_observers(iron);
 		}
 
 		// While in sleep state count the hibernate timer
 		if (iron->state == IRON_STATE_SLEEP)
-			iron->hibernate_timer++;
+		{
+			iron->hibernate_timer += 10; // Increase by 10 ms (assuming this function is called every 10 ms)
+		}
 	}
 	else
 	{
@@ -229,6 +254,7 @@ void iron_update_state(iron_t *iron)
 			PIDSetpointSet(&iron->pid, (float)iron->setpoint);
 			iron->state = new_state;
 			iron->hibernate_timer = 0; // Reset the hibernate timer
+									   // iron_notify_observers(iron);
 		}
 	}
 
@@ -236,3 +262,50 @@ void iron_update_state(iron_t *iron)
 	// and the setpoint temperature
 	iron_compute_pid(iron);
 }
+
+// uint8_t iron_observer_add(iron_t *iron, iron_observer_cb_t cb, void *user_data)
+// {
+// 	if (iron->observer_count >= IRON_MAX_OBSERVERS)
+// 		return 0;
+
+// 	iron->observers[iron->observer_count].cb = cb;
+// 	iron->observers[iron->observer_count].user_data = user_data;
+// 	iron->observer_count++;
+// 	return iron->observer_count;
+// }
+
+// uint8_t iron_observer_remove(iron_t *iron, iron_observer_cb_t cb)
+// {
+// 	for (uint8_t i = 0; i < iron->observer_count; i++)
+// 	{
+// 		if (iron->observers[i].cb == cb)
+// 		{
+// 			// Shift remaining observers down
+// 			for (uint8_t j = i; j < iron->observer_count - 1; j++)
+// 			{
+// 				iron->observers[j].cb = iron->observers[j + 1].cb;
+// 				iron->observers[j].user_data = iron->observers[j + 1].user_data;
+// 			}
+// 			iron->observers[--iron->observer_count].cb = NULL;
+// 			iron->observers[iron->observer_count].user_data = NULL;
+// 			return 1; // Successfully removed
+// 		}
+// 	}
+// 	return 0; // Observer not found
+// }
+
+// /**
+//  * Notify all registered observers about a state change
+//  *
+//  * @param iron Pointer to the soldering iron instance
+//  */
+// void iron_notify_observers(iron_t *iron)
+// {
+// 	for (uint8_t i = 0; i < iron->observer_count; i++)
+// 	{
+// 		if (iron->observers[i].cb != NULL)
+// 		{
+// 			iron->observers[i].cb(iron, iron->observers[i].user_data);
+// 		}
+// 	}
+// }

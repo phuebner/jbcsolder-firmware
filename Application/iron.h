@@ -11,15 +11,28 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "pid.h"
+/* -------------------------------------------------------------------------- */
+/*                                   DEFINES                                  */
+/* -------------------------------------------------------------------------- */
+#define IRON_MAX_OBSERVERS 4 // Maximum number of observers for the iron state changes
 
 /* -------------------------------------------------------------------------- */
 /*                              TYPE DEFINITIONS                              */
 /* -------------------------------------------------------------------------- */
+typedef struct _iron_t iron_t; // Forward declaration of iron_t for use in observer callback typedef
+
+typedef void (*iron_observer_cb_t)(iron_t *iron, void *user_data); // Callback type for iron state change observers
+
+typedef struct
+{
+    iron_observer_cb_t cb;
+    void *user_data;
+} iron_observer_t;
 
 typedef struct
 {
     uint16_t sleep_temperature;
-    uint32_t hibernate_delay; /** Hibernate delay in number of halfwaves (10ms @ 50Hz or  8.33ms @ 60Hz) */
+    uint32_t hibernate_delay; /** Hibernate delay in number of half-waves (10ms @ 50Hz or  8.33ms @ 60Hz) */
 } iron_config_t;
 
 /**
@@ -38,19 +51,46 @@ typedef struct
     _Bool (*get_sleep_pin_state)(void); /** Get the state of the sleep pin */
 } iron_drv_t;
 
+// States of the soldering iron
 typedef enum
 {
     IRON_STATE_NOT_CONNECTED,
     IRON_STATE_OFF,
     IRON_STATE_HIBERNATE,
     IRON_STATE_SLEEP,
-    IRON_STATE_ACTIVE
+    IRON_STATE_ACTIVE,
 } iron_state_t;
+
+// String representations of the iron states for UI display and logging
+static const char *state_str[] = {
+    [IRON_STATE_NOT_CONNECTED] = "Not Connected",
+    [IRON_STATE_OFF] = "Disabled",
+    [IRON_STATE_HIBERNATE] = "Hibernate",
+    [IRON_STATE_SLEEP] = "Sleep",
+    [IRON_STATE_ACTIVE] = "Active",
+};
+
+// Types of supported soldering irons
+typedef enum
+{
+    IRON_TYPE_UNKNOWN,
+    IRON_TYPE_JBC_T245,
+    IRON_TYPE_JBC_T210,
+} iron_type_t;
+
+// String representations of the iron types for UI display and logging
+static const char *iron_type_str[] = {
+    [IRON_TYPE_UNKNOWN] = "Unknown",
+    [IRON_TYPE_JBC_T245] = "JBC T245",
+    [IRON_TYPE_JBC_T210] = "JBC T210",
+};
 
 // typedef void (*iron_state_change_cb_t)(const iron_state_t state);
 
-typedef struct
+struct _iron_t
 {
+    char name[20];            /** Name of the soldering iron */
+    iron_type_t type;         /** Type of the soldering iron */
     iron_config_t cfg;        /** Configuration of the soldering iron */
     iron_drv_t *drv;          /** Hardware driver for the soldering iron */
     uint16_t setpoint;        /** Setpoint temperature in degrees Celsius */
@@ -62,26 +102,49 @@ typedef struct
     PIDControl pid;
     uint16_t power;
     float pid_out;
-    uint32_t half_cycle_counter;      /** Heater half cycle counter for controlling the heater in alternating periods */
-    uint32_t heater_skip_half_cycles; /** Number of half cycles to skip for the heater control, 0xFFFF means no power, 0 means full power */
-    // iron_state_change_cb_t state_change_cb;
-} iron_t;
-
+    uint32_t half_cycle_counter;                   /** Heater half cycle counter for controlling the heater in alternating periods */
+    uint32_t heater_skip_half_cycles;              /** Number of half cycles to skip for the heater control, 0xFFFF means no power, 0 means full power */
+    iron_observer_t observers[IRON_MAX_OBSERVERS]; /** Array of observer callbacks for state changes */
+    uint8_t observer_count;                        /** Current number of registered observers */
+};
 /* -------------------------------------------------------------------------- */
-/*                              GLOBAL PROTOTYPS                              */
+/*                              GLOBAL PROTOTYPES                              */
 /* -------------------------------------------------------------------------- */
 
 /**
- * @brief Init instance of soldering iron
+ * @brief Initializes an iron instance with the provided configuration.
  *
+ * @param iron Pointer to the iron instance to be initialized
+ * @param drv Pointer to the iron driver configuration
+ * @param name String identifier for the iron instance
+ * @param type Type identifier for the iron instance
+ *
+ * @note This function must be called before using any other iron-related functions
  */
-void iron_init(iron_t *iron, iron_drv_t *drv);
+void iron_init(iron_t *iron, iron_drv_t *drv, char *name, iron_type_t type);
+
+/**
+ *  Add an observer callback to the soldering iron instance
+ *
+ * @param iron  Pointer to the soldering iron instance
+ * @param cb    Observer callback function
+ * @return uint8_t  New number of observers, or 0 if the maximum is reached
+ */
+// uint8_t iron_observer_add(iron_t *iron, iron_observer_cb_t cb, void *user_data);
+
+/**
+ *  Remove an observer callback from the soldering iron instance
+ *
+ * @param iron  Pointer to the soldering iron instance
+ * @param cb    Observer callback function to remove
+ * @return uint8_t  1 if successfully removed, 0 if not found
+ */
+// uint8_t iron_observer_remove(iron_t *iron, iron_observer_cb_t cb);
 
 /* ---------------------------- Setter Functions ---------------------------- */
 
 void iron_set_setpoint(iron_t *iron, uint16_t temperature);
 void iron_set_enable(iron_t *iron, _Bool value);
-// void iron_set_state_change_cb(iron_state_change_cb_t cb);
 
 /* ---------------------------- Getter Functions ---------------------------- */
 

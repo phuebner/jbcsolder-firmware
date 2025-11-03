@@ -36,29 +36,5 @@ lv_obj_t *titlebar_create(lv_obj_t *parent)
     lv_obj_set_size(titlebar, lv_obj_get_width(parent), TITLEBAR_HEIGHT);
     lv_obj_set_pos(titlebar, 0, 0);
 
-#ifdef SIMULATOR
-    /* Button only available in the simulator, to toggle between in-stand and out of stand */
-    lv_obj_t *btn_sim_toggle_stand = lv_button_create(titlebar);
-    lv_obj_add_style(btn_sim_toggle_stand, &sty_titlebar, LV_STATE_DEFAULT);
-    lv_obj_add_style(btn_sim_toggle_stand, &sty_titlebar_button_checked, LV_STATE_CHECKED);
-    lv_obj_set_size(btn_sim_toggle_stand, 50, TITLEBAR_HEIGHT);
-    lv_obj_set_pos(btn_sim_toggle_stand, 80, 0);
-    lv_obj_add_flag(btn_sim_toggle_stand, LV_OBJ_FLAG_CHECKABLE);
-
-    lv_obj_t *lbl_btn_sim_toggle_stand = lv_label_create(btn_sim_toggle_stand);
-    lv_obj_align(lbl_btn_sim_toggle_stand, LV_ALIGN_CENTER, 0, 0);
-    lv_label_set_text(lbl_btn_sim_toggle_stand, LV_SYMBOL_LOOP);
-
-    lv_obj_add_event_cb(btn_sim_toggle_stand, switch_to_stand_event_cb, LV_EVENT_CLICKED, NULL);
-#endif
     return titlebar;
 }
-
-#ifdef SIMULATOR
-static void switch_to_stand_event_cb(lv_event_t *e)
-{
-    iron_set_enable(&iron_a, !lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); // Toggle the heater state
-    // Placeholder: implement your event handling logic here
-    // For now, just print or toggle something if needed
-}
-#endif

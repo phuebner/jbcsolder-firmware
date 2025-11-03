@@ -1,10 +1,7 @@
 #include "quick_drawer.h"
 #include "theme.h"
 
-LV_FONT_DECLARE(lv_font_roboto_24);
-
-static const lv_coord_t DRAWER_WIDTH = 63;
-static const lv_coord_t DRAWER_PADDING_VER = 14;
+LV_FONT_DECLARE(font_roboto_24_regular);
 
 static lv_style_t sty_quick_drawer;
 static lv_style_t sty_btn_quick_drawer;
@@ -34,7 +31,7 @@ static void setup_styles()
 
     // Text style for buttons
     lv_style_set_text_color(&sty_quick_drawer, lv_color_white());
-    lv_style_set_text_font(&sty_quick_drawer, &lv_font_roboto_24);
+    lv_style_set_text_font(&sty_quick_drawer, &font_roboto_24_regular);
 
     // Button style (on top of quick drawer main style)
     lv_style_init(&sty_btn_quick_drawer);
@@ -87,7 +84,7 @@ lv_obj_t *quick_drawer_create(lv_obj_t *parent)
 
     setup_styles();
 
-    const lv_coord_t drawer_height = (lv_obj_get_height(lv_scr_act()) - (2 * DRAWER_PADDING_VER));
+    const lv_coord_t drawer_height = (lv_obj_get_height(lv_scr_act()) - (2 * QUICK_DRAWER_PADDING_VER));
 
     // Preset drawer create and apply style
     quick_drawer = lv_obj_create(lv_scr_act());
@@ -95,7 +92,7 @@ lv_obj_t *quick_drawer_create(lv_obj_t *parent)
 
     // Set size and position
     const lv_coord_t corner_radius = lv_obj_get_style_radius(quick_drawer, LV_PART_MAIN);
-    lv_obj_set_size(quick_drawer, DRAWER_WIDTH + corner_radius, drawer_height); // Add corner radius to width to hide right corner
+    lv_obj_set_size(quick_drawer, QUICK_DRAWER_WIDTH + corner_radius, drawer_height); // Add corner radius to width to hide right corner
     lv_obj_align(quick_drawer, LV_ALIGN_RIGHT_MID, corner_radius, 0);
 
     lv_obj_update_layout(parent); // This is needed to get the correct width and height of the object

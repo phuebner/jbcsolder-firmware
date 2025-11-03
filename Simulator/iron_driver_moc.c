@@ -8,44 +8,45 @@
 static bool ch1_amplifier_enabled = false;
 static bool ch1_heater_enabled = false;
 static bool ch1_adc_conversion_started = false;
-static double ch1_mock_adc_value = 1000.0; // Initial mock ADC value (simulate temperature). Value in double for more realistic simulation. Needs to be converted to uint16_t in adc_read.
+static bool ch1_sleep_pin_state = false;
+static double ch1_mock_adc_value = 70.0; // Start at room temperature equivalent (approx ADC value for 24C)
 
-void iron_hw_channel_1_amplifier_en(bool en)
+static void iron_hw_channel_1_amplifier_en(bool en)
 {
     ch1_amplifier_enabled = en;
-    printf("[MOC] CH1 Amplifier %s\n", en ? "ENABLED" : "DISABLED");
+    // printf("[MOC] CH1 Amplifier %s\n", en ? "ENABLED" : "DISABLED");
 }
 
-void iron_hw_channel_1_heater_en(bool en)
+static void iron_hw_channel_1_heater_en(bool en)
 {
     ch1_heater_enabled = en;
-    printf("[MOC] CH1 Heater %s\n", en ? "ENABLED" : "DISABLED");
+    // printf("[MOC] CH1 Heater %s\n", en ? "ENABLED" : "DISABLED");
 }
 
-void iron_hw_channel_1_adc_start(void)
+static void iron_hw_channel_1_adc_start(void)
 {
     ch1_adc_conversion_started = true;
-    printf("[MOC] CH1 ADC conversion started\n");
+    // printf("[MOC] CH1 ADC conversion started\n");
 }
 
-uint16_t iron_hw_channel_1_adc_read(void)
+static uint16_t iron_hw_channel_1_adc_read(void)
 {
     if (!ch1_adc_conversion_started)
     {
-        printf("[MOC] CH1 Warning: ADC read before start\n");
+        // printf("[MOC] CH1 Warning: ADC read before start\n");
     }
     ch1_adc_conversion_started = false;
 
     uint16_t adc_value = (uint16_t)round(ch1_mock_adc_value);
-    printf("[MOC] CH1 ADC read value: %u\n", adc_value);
+    // printf("[MOC] CH1 ADC read value: %u\n", adc_value);
     return adc_value;
 }
 
-_Bool iron_hw_channel_1_get_sleep_pin_state(void)
+static _Bool iron_hw_channel_1_get_sleep_pin_state(void)
 {
     // Mock sleep pin state, always return false in this mock
-    printf("[MOC] CH1 Sleep pin state: NOT SLEEPING\n");
-    return false;
+    // printf("[MOC] CH1 Sleep pin state: NOT SLEEPING\n");
+    return ch1_sleep_pin_state;
 }
 
 iron_drv_t iron_hw_channel_1 = {
@@ -63,15 +64,21 @@ void simulate_temperature_change()
         // Simulate temperature rising when heater is enabled
         if (ch1_mock_adc_value < 4095.0)
         {
-            ch1_mock_adc_value += 0.1;
+            ch1_mock_adc_value += 2;
         }
     }
     else
     {
         // Simulate temperature falling when heater is disabled
-        if (ch1_mock_adc_value > 500.0)
+        if (ch1_mock_adc_value > 70.0)
         {
-            ch1_mock_adc_value -= 0.05;
+            ch1_mock_adc_value -= 0.1;
         }
     }
+}
+
+void iron_a_set_sleep_mode(bool sleep)
+{
+    ch1_sleep_pin_state = sleep;
+    // printf("[MOC] CH1 Sleep mode set to: %s\n", sleep ? "SLEEPING" : "NOT SLEEPING");
 }

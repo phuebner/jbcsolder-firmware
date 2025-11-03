@@ -21,9 +21,15 @@
         "adc.h": "c",
         "sdl.h": "c",
         "numeric": "c",
-        "lvgl.h": "c"
+        "lvgl.h": "c",
+        "power_bar.h": "c",
+        "quick_drawer.h": "c",
+        "screen_iron.h": "c",
+        "cstdlib": "c",
+        "lv_obj_private.h": "c"
     },
     "cSpell.words": [
         "hadc"
-    ]
+    ],
+    "cSpell.enabled": true
 }

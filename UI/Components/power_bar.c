@@ -17,6 +17,10 @@ static void setup_styles()
     lv_style_set_border_width(&sty_power_bar_bg, 0);
     lv_style_set_radius(&sty_power_bar_bg, 4);
     lv_style_set_pad_all(&sty_power_bar_bg, 0);
+    lv_style_set_margin_bottom(&sty_power_bar_bg, 5);
+    lv_style_set_margin_top(&sty_power_bar_bg, 5);
+    lv_style_set_margin_left(&sty_power_bar_bg, 5);
+    lv_style_set_margin_right(&sty_power_bar_bg, 5);
 
     // Power bar indicator
     lv_style_init(&sty_power_bar_indicator);
@@ -33,17 +37,22 @@ lv_obj_t *power_bar_create(lv_obj_t *parent)
     lv_obj_add_style(bar_power, &sty_power_bar_bg, 0);
     lv_obj_add_style(bar_power, &sty_power_bar_indicator, LV_PART_INDICATOR);
 
-    lv_obj_set_size(bar_power, POWER_BAR_WIDTH, lv_obj_get_height(parent) - (2 * POWER_BAR_PADDING_VER));
+    lv_obj_set_size(bar_power, POWER_BAR_WIDTH, lv_pct(100));
 
-    // lv_bar_set_bar_power, 500);
     lv_bar_set_range(bar_power, 0, 20);
     lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
-    //     lv_obj_align(bar_power, NULL, LV_ALIGN_IN_BOTTOM_LEFT, POWER_BAR_PADDING_HOR, -(POWER_BAR_PADDING_VER));
-    //     lv_obj_set_drag_parent(bar_power, true);
     return bar_power;
 }
 
 void power_bar_set_value(lv_obj_t *obj, int32_t value)
 {
     lv_bar_set_value(obj, value, LV_ANIM_ON);
+}
+
+lv_observer_t *power_bar_bind_power(lv_obj_t *obj, lv_subject_t *subject)
+{
+    LV_ASSERT_NULL(obj);
+    LV_ASSERT_NULL(subject);
+
+    lv_bar_bind_value(obj, subject);
 }

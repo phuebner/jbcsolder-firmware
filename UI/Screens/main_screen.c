@@ -11,13 +11,19 @@
 #include "theme.h"
 #include "iron.h"
 #include "main_screen.h"
+#include "iron/screen_iron.h"
 #include "screen_menu.h"
-#include "screen_graph.h"
+#include "page_temperature_graph.h"
 #include "buzzer.h"
 #include "titlebar.h"
 #include "titlebar_button.h"
 #include "quick_drawer.h"
 #include "power_bar.h"
+#include "iron.h" // Ensure this is included for iron_a definition
+
+// If iron_a is not defined in any header, declare it here as extern
+// TODO: Remove this line if iron_a is defined in iron.h or another included header
+extern iron_t iron_a;
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
@@ -44,14 +50,7 @@ static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event);
 
 static void switch_to_menu_event_cb(lv_event_t *event);
 static void return_to_home_event_cb(lv_event_t *event);
-
-const char *state_str[] = {
-    [IRON_STATE_NOT_CONNECTED] = "Not Connected",
-    [IRON_STATE_OFF] = "OFF",
-    [IRON_STATE_HIBERNATE] = "Hibernate",
-    [IRON_STATE_SLEEP] = "Sleep",
-    [IRON_STATE_ACTIVE] = "Active",
-};
+static void tile_change_event_cb(lv_event_t *event);
 
 /* -------------------------------------------------------------------------- */
 /*                              STATIC VARIABLES                              */
@@ -89,7 +88,10 @@ lv_obj_t *tileview;
 /* Sizes */
 static const lv_coord_t TITLEBAR_HEIGHT = 35;
 
-// static const lv_coord_t CENTER_AREA_WIDTH = (LV_HOR_RES_MAX - POWER_BAR_PADDING_HOR - POWER_BAR_WIDTH - DRAWER_WIDTH);
+static lv_obj_t *page_iron_control;
+static lv_obj_t *page_iron_graph;
+static bool is_hidden = false;
+// static const lv_coord_t CENTER_AREA_WIDTH = (LV_HOR_RES_MAX - POWER_BAR_PADDING_HOR - POWER_BAR_WIDTH - QUICK_DRAWER_WIDTH);
 // static const lv_point_t CENTER_AREA_POSITION = {x : POWER_BAR_WIDTH + POWER_BAR_PADDING_HOR, y : TITLEBAR_HEIGHT};
 
 /* -------------------------------------------------------------------------- */
@@ -186,10 +188,18 @@ static void setup_main_screen(void)
     tileview = lv_tileview_create(lv_scr_act());
     lv_obj_t *tile_main = lv_tileview_add_tile(tileview, 0, 0, LV_DIR_BOTTOM);
     lv_obj_t *tile_graph = lv_tileview_add_tile(tileview, 0, 1, LV_DIR_TOP);
+    lv_obj_set_scrollbar_mode(tileview, LV_SCROLLBAR_MODE_OFF);
 
-    lv_obj_t *power_bar = power_bar_create(tile_main);
-    lv_obj_set_height(power_bar, (LV_VER_RES - 55 - (2 * 14)));
-    lv_obj_align(power_bar, LV_ALIGN_BOTTOM_LEFT, 10, -(14));
+    lv_obj_set_size(tileview, LV_HOR_RES, LV_VER_RES - 35);
+    lv_obj_set_pos(tileview, 0, 35);
+
+    page_iron_control = screen_iron_create(tile_main, &iron_a);
+    lv_obj_set_flex_grow(page_iron_control, 1);
+
+    page_iron_graph = page_temperature_graph_create(tile_graph, &iron_a);
+    lv_obj_set_flex_grow(page_iron_graph, 1);
+
+    lv_obj_add_event_cb(tileview, tile_change_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // lv_obj_set_size(tileview, LV_HOR_RES, LV_VER_RES);
     // lv_tileview_set_(tileview, valid_pos, 2);
@@ -515,7 +525,7 @@ static void setup_main_screen(void)
 
 static void switch_to_menu_event_cb(lv_event_t *event)
 {
-    static bool is_hidden = false;
+
     if (is_hidden)
     {
         quick_drawer_show(box_presets);
@@ -541,4 +551,28 @@ static void return_to_home_event_cb(lv_event_t *event)
     //         lv_obj_del(lv_scr_act());
     //         create_main_screen();
     //     }
+}
+
+static void tile_change_event_cb(lv_event_t *event)
+{
+    lv_event_code_t code = lv_event_get_code(event);
+    lv_obj_t *tileview = lv_event_get_target(event);
+    lv_point_t tile_pos;
+    lv_obj_t *active_tile = lv_tileview_get_tile_active(tileview);
+
+    if (code != LV_EVENT_VALUE_CHANGED)
+    {
+        return;
+    }
+
+    if (lv_obj_get_index(active_tile) == 0 && is_hidden)
+    {
+        quick_drawer_show(box_presets);
+        is_hidden = false;
+    }
+    else if (lv_obj_get_index(active_tile) != 0 && !is_hidden)
+    {
+        quick_drawer_hide(box_presets);
+        is_hidden = true;
+    }
 }
