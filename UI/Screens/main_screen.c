@@ -44,7 +44,7 @@ static void setup_main_screen(void);
 // LV_EVENT_CB_DECLARE(encoder_target_event_cb);
 // LV_EVENT_CB_DECLARE(btn_inc_setpoint_event_cb);
 // LV_EVENT_CB_DECLARE(btn_dec_setpoint_event_cb);
-static void btn_quick_event_cb(lv_obj_t *obj, lv_event_t event);
+static void btn_quick_event_cb(lv_event_t *e);
 static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event);
 // static void main_screen_refresher_task(struct _lv_task_t *);
 
@@ -160,6 +160,8 @@ static void setup_titlebar(void)
     lv_obj_add_event_cb(btn_menu, switch_to_menu_event_cb, LV_EVENT_CLICKED, NULL);
 
     box_presets = quick_drawer_create(lv_scr_act());
+    quick_drawer_set_presets(box_presets, 350, 300, 250);
+    lv_obj_add_event_cb(box_presets, btn_quick_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     // /* Graph button */
     // lv_obj_t *btn_graph = lv_btn_create(lv_scr_act(), NULL);
     // lv_theme_apply(btn_graph, (lv_theme_style_t)CUSTOM_THEME_TITLEBAR_BTN);
@@ -390,28 +392,32 @@ static void setup_main_screen(void)
 //         iron_set_setpoint(iron_get_setpoint() - SETPOINT_STEP_SIZE);
 // }
 
-// static void btn_quick_event_cb(lv_obj_t *obj, lv_event_t event)
-// {
-//     switch (event)
-//     {
-//     case LV_EVENT_CLICKED:
-//         if (obj == btn_quick1)
-//         {
-//             iron_set_setpoint(350);
-//         }
-//         else if (obj == btn_quick2)
-//         {
-//             iron_set_setpoint(300);
-//         }
-//         else if (obj == btn_quick3)
-//         {
-//             iron_set_setpoint(250);
-//         }
-//         break;
-//     default:
-//         break;
-//     }
-// }
+static void btn_quick_event_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    // lv_obj_t *obj = lv_event_get_target(e);
+    int32_t btn_id = (int32_t)lv_event_get_param(e);
+
+    switch (code)
+    {
+    case LV_EVENT_VALUE_CHANGED:
+        if (btn_id == 1)
+        {
+            iron_set_setpoint(&iron_a, 350);
+        }
+        else if (btn_id == 2)
+        {
+            iron_set_setpoint(&iron_a, 300);
+        }
+        else if (btn_id == 3)
+        {
+            iron_set_setpoint(&iron_a, 250);
+        }
+        break;
+    default:
+        break;
+    }
+}
 
 // static void main_screen_iron_enable_event_cb(lv_obj_t *obj, lv_event_t event)
 // {
@@ -526,15 +532,13 @@ static void setup_main_screen(void)
 static void switch_to_menu_event_cb(lv_event_t *event)
 {
 
-    if (is_hidden)
+    if (quick_drawer_is_hidden(box_presets))
     {
         quick_drawer_show(box_presets);
-        is_hidden = false;
     }
     else
     {
         quick_drawer_hide(box_presets);
-        is_hidden = true;
     }
     //     if (event == LV_EVENT_CLICKED)
     //     {
@@ -565,14 +569,12 @@ static void tile_change_event_cb(lv_event_t *event)
         return;
     }
 
-    if (lv_obj_get_index(active_tile) == 0 && is_hidden)
+    if (lv_obj_get_index(active_tile) == 0)
     {
         quick_drawer_show(box_presets);
-        is_hidden = false;
     }
-    else if (lv_obj_get_index(active_tile) != 0 && !is_hidden)
+    else if (lv_obj_get_index(active_tile) != 0)
     {
         quick_drawer_hide(box_presets);
-        is_hidden = true;
     }
 }

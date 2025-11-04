@@ -26,7 +26,8 @@
         "quick_drawer.h": "c",
         "screen_iron.h": "c",
         "cstdlib": "c",
-        "lv_obj_private.h": "c"
+        "lv_obj_private.h": "c",
+        "map": "c"
     },
     "cSpell.words": [
         "hadc"
