@@ -72,18 +72,16 @@ void iron_timer_irq_handler()
         break;
     case IRON_HW_STATE_ENABLE_AMPLIFIER:
         // HAL_GPIO_WritePin(TCA_AMPLIFIER_EN_GPIO_Port, TCA_AMPLIFIER_EN_Pin, GPIO_PIN_SET);
-        iron_a->drv->amplifier_en(true); // Enable thermocouple amplifier to read temperature
-        iron_a->drv->adc_start();        // Start ADC conversion to read the temperature
+        iron_enable_amplifier(iron_a, true); // Enable thermocouple amplifier to read temperature
 
         iron_hardware_state = IRON_HW_STATE_PROCESS_ADC; // Next we process ADC
         __HAL_TIM_SET_AUTORELOAD(&htim7, 300);           // 300us
         HAL_TIM_Base_Start_IT(&htim7);
         break;
     case IRON_HW_STATE_PROCESS_ADC:
-
-        iron_a->drv->amplifier_en(false); // Disable thermocouple amplifier to reduce noise
-        iron_update_state(iron_a);        // Update iron status based on iron in stand and sleep timer
-
+        iron_start_adc(iron_a);                           // Start ADC conversion to read the temperature
+        iron_update_state(iron_a);                        // Update iron status based on iron in stand and sleep timer
+        iron_enable_amplifier(iron_a, false);             // Disable thermocouple amplifier after reading temperature
         iron_hardware_state = IRON_HW_STATE_CONTROL_IRON; // Next we process ADC
         __HAL_TIM_SET_AUTORELOAD(&htim7, 50);             // 10us
         HAL_TIM_Base_Start_IT(&htim7);

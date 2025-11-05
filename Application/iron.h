@@ -165,7 +165,20 @@ _Bool iron_is_enabled(iron_t *iron);
 _Bool iron_is_sleeping(iron_t *iron);
 
 /* ---------------------------- Other Functions ----------------------------- */
-void iron_heater_disable(iron_t *iron);
+static inline void iron_heater_disable(iron_t *iron)
+{
+    iron->drv->heater_en(false);
+}
+
+static inline void iron_enable_amplifier(iron_t *iron, _Bool enable)
+{
+    iron->drv->amplifier_en(enable);
+}
+static inline void iron_start_adc(iron_t *iron)
+{
+    iron->drv->adc_start();
+}
+
 void iron_control_heater(iron_t *iron);
 void iron_update_state(iron_t *iron);
 

@@ -72,7 +72,7 @@ iron_t *iron_init(ironIdentifier_e identifier, iron_drv_t *drv, char *name, iron
 	iron->power = 0xFFFF; // 0xFFFF means no power, 0 means full power
 	iron->pid_out = 0.0;
 
-	PIDInit(&(iron->pid), 1.5, 0.005, 0.05,
+	PIDInit(&(iron->pid), 1.3, 0, 0.01,
 			0.01, 0, PID_OUT_GRANULARITY, AUTOMATIC,
 			DIRECT);
 	PIDSetpointSet(&(iron->pid), 0.0);
@@ -165,12 +165,6 @@ static void iron_compute_pid(iron_t *iron)
 
 	// Compute PID output
 	PIDCompute(&(iron->pid));
-}
-
-void iron_heater_disable(iron_t *iron)
-{
-	// Disable the heater
-	iron->drv->heater_en(false);
 }
 
 void iron_control_heater(iron_t *iron)

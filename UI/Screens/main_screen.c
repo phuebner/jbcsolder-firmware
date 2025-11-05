@@ -23,7 +23,7 @@
 
 // If iron_a is not defined in any header, declare it here as extern
 // TODO: Remove this line if iron_a is defined in iron.h or another included header
-extern iron_t iron_a;
+extern iron_t *iron_a;
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
@@ -195,10 +195,10 @@ static void setup_main_screen(void)
     lv_obj_set_size(tileview, LV_HOR_RES, LV_VER_RES - 35);
     lv_obj_set_pos(tileview, 0, 35);
 
-    page_iron_control = screen_iron_create(tile_main, &iron_a);
+    page_iron_control = screen_iron_create(tile_main, iron_a);
     lv_obj_set_flex_grow(page_iron_control, 1);
 
-    page_iron_graph = page_temperature_graph_create(tile_graph, &iron_a);
+    page_iron_graph = page_temperature_graph_create(tile_graph, iron_a);
     lv_obj_set_flex_grow(page_iron_graph, 1);
 
     lv_obj_add_event_cb(tileview, tile_change_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -403,15 +403,15 @@ static void btn_quick_event_cb(lv_event_t *e)
     case LV_EVENT_VALUE_CHANGED:
         if (btn_id == 1)
         {
-            iron_set_setpoint(&iron_a, 350);
+            iron_set_setpoint(iron_a, 350);
         }
         else if (btn_id == 2)
         {
-            iron_set_setpoint(&iron_a, 300);
+            iron_set_setpoint(iron_a, 300);
         }
         else if (btn_id == 3)
         {
-            iron_set_setpoint(&iron_a, 250);
+            iron_set_setpoint(iron_a, 250);
         }
         break;
     default:
