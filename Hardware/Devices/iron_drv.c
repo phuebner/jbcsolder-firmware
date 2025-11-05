@@ -2,6 +2,8 @@
 #include "iron_drv.h"
 #include "adc.h"
 
+#define DEBOUNCE_DELAY_MS 200 // Debounce delay in milliseconds
+
 /* -------------------------------------------------------------------------- */
 /*                              TYPE DEFINITIONS                              */
 /* -------------------------------------------------------------------------- */
@@ -87,7 +89,7 @@ static uint16_t iron_hw_channel_1_adc_read(void)
 
 static _Bool iron_hw_channel_1_get_sleep_pin_state(void)
 {
-    return debounce_sleep_pin(&sleep_pin_ch1);
+    return debounce_pin(&sleep_pin_ch1);
 }
 
 iron_drv_t iron_hw_channel_1 = {

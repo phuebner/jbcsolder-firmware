@@ -5,7 +5,7 @@
  *      Author: patrick
  */
 #include "lvgl.h"
-#include "drv/ft6236u/ft6236u.h"
+#include "ft6236u.h"
 
 static lv_indev_t *touch_indev;
 

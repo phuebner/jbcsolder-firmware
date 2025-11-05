@@ -2,13 +2,12 @@
 #include "delay.h"
 #include "adc.h"
 #include "tim.h"
+#include "iron.h"
 #include <stdbool.h>
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
 /* -------------------------------------------------------------------------- */
-
-#define DEBOUNCE_DELAY_MS 200 // Debounce delay in milliseconds
 
 /* -------------------------------------------------------------------------- */
 /*                              TYPE DEFINITIONS                              */
@@ -47,6 +46,7 @@ static uint32_t cycle = 0;
 /* -------------------------------------------------------------------------- */
 /*                             INTERRUPT HANDLERS                             */
 /* -------------------------------------------------------------------------- */
+extern iron_t *iron_a;
 
 /**
  * @brief Iron state machine based on timer interrupt
@@ -54,10 +54,13 @@ static uint32_t cycle = 0;
  */
 void iron_timer_irq_handler()
 {
+    if (iron_a == NULL)
+        return;
+
     switch (iron_hardware_state)
     {
     case IRON_HW_STATE_ZERO_CROSS:
-        HAL_GPIO_WritePin(HEATER_A_EN_GPIO_Port, HEATER_A_EN_Pin, GPIO_PIN_RESET); // Turn off iron
+        iron_heater_disable(iron_a); // Disable the heater before starting a new cycle
 
         // Track half-cycles and cycles to control the heater in alternating periods
         half_cycle = half_cycle == 1 ? 0 : 1; // alternate between 0 and 1 to track half cycles
@@ -68,33 +71,26 @@ void iron_timer_irq_handler()
         HAL_TIM_Base_Start_IT(&htim7);
         break;
     case IRON_HW_STATE_ENABLE_AMPLIFIER:
-        HAL_GPIO_WritePin(TCA_AMPLIFIER_EN_GPIO_Port, TCA_AMPLIFIER_EN_Pin, GPIO_PIN_SET);
+        // HAL_GPIO_WritePin(TCA_AMPLIFIER_EN_GPIO_Port, TCA_AMPLIFIER_EN_Pin, GPIO_PIN_SET);
+        iron_a->drv->amplifier_en(true); // Enable thermocouple amplifier to read temperature
+        iron_a->drv->adc_start();        // Start ADC conversion to read the temperature
 
         iron_hardware_state = IRON_HW_STATE_PROCESS_ADC; // Next we process ADC
         __HAL_TIM_SET_AUTORELOAD(&htim7, 300);           // 300us
         HAL_TIM_Base_Start_IT(&htim7);
         break;
     case IRON_HW_STATE_PROCESS_ADC:
-        iron_calculate_temperature(iron_adc_read(&hadc1));
-        HAL_GPIO_WritePin(TCA_AMPLIFIER_EN_GPIO_Port, TCA_AMPLIFIER_EN_Pin, GPIO_PIN_RESET);
 
-        iron_update_state(); // Update iron status based on iron in stand and sleep timer
-
-        pid.input = (float)temperature_smooth;
-        PIDCompute(&pid);
-        pid_out = pid.output;
-        power = pid_out == 0 ? 0xFFFF : PID_OUT_GRANULARITY + 1 - pid_out;
+        iron_a->drv->amplifier_en(false); // Disable thermocouple amplifier to reduce noise
+        iron_update_state(iron_a);        // Update iron status based on iron in stand and sleep timer
 
         iron_hardware_state = IRON_HW_STATE_CONTROL_IRON; // Next we process ADC
         __HAL_TIM_SET_AUTORELOAD(&htim7, 50);             // 10us
         HAL_TIM_Base_Start_IT(&htim7);
         break;
     case IRON_HW_STATE_CONTROL_IRON:
-        if (iron.state == IRON_STATE_ACTIVE || iron.state == IRON_STATE_SLEEP)
-        {
-            if (cycle % power == 0)
-                HAL_GPIO_WritePin(HEATER_A_EN_GPIO_Port, HEATER_A_EN_Pin, GPIO_PIN_SET);
-        }
+        iron_control_heater(iron_a); // Control the heater based on the current state and temperature
+
         iron_hardware_state = IRON_HW_STATE_IDLE; // And we are done
         break;
     case IRON_HW_STATE_IDLE:

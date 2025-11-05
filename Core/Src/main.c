@@ -35,6 +35,7 @@
 #include "lv_port_indev_encoder.h"
 
 #include "iron.h"
+#include "iron_drv.h"
 
 #include "lvgl.h"
 // #include "hal_lvgl_touch.h"
@@ -63,7 +64,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-iron_t iron_a;
+iron_t *iron_a = NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,7 +126,7 @@ int main(void)
   MX_ADC2_Init();
   MX_ADC3_Init();
   /* USER CODE BEGIN 2 */
-  iron_init();
+  iron_a = iron_init(IRON_IDENTIFIER_A, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
 
   // Initialize LVGL
   lv_init();                        // Initialize LVGL

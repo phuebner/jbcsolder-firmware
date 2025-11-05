@@ -19,6 +19,13 @@
 /* -------------------------------------------------------------------------- */
 /*                              TYPE DEFINITIONS                              */
 /* -------------------------------------------------------------------------- */
+typedef enum
+{
+    IRON_IDENTIFIER_A = 0,
+    IRON_IDENTIFIER_B,
+    IRON_COUNT,
+} ironIdentifier_e;
+
 typedef struct _iron_t iron_t; // Forward declaration of iron_t for use in observer callback typedef
 
 typedef void (*iron_observer_cb_t)(iron_t *iron, void *user_data); // Callback type for iron state change observers
@@ -121,7 +128,7 @@ struct _iron_t
  *
  * @note This function must be called before using any other iron-related functions
  */
-void iron_init(iron_t *iron, iron_drv_t *drv, char *name, iron_type_t type);
+iron_t *iron_init(ironIdentifier_e identifier, iron_drv_t *drv, char *name, iron_type_t type);
 
 /**
  *  Add an observer callback to the soldering iron instance

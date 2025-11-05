@@ -35,7 +35,7 @@ static void iron_compute_pid(iron_t *iron);
 /* -------------------------------------------------------------------------- */
 /*                              STATIC VARIABLES                              */
 /* -------------------------------------------------------------------------- */
-
+static iron_t iron_instances[IRON_COUNT];
 /* -------------------------------------------------------------------------- */
 /*                              GLOBAL FUNCTIONS                              */
 /* -------------------------------------------------------------------------- */
@@ -44,8 +44,10 @@ static void iron_compute_pid(iron_t *iron);
  * @brief Init instance of soldering iron
  *
  */
-void iron_init(iron_t *iron, iron_drv_t *drv, char *name, iron_type_t type)
+iron_t *iron_init(ironIdentifier_e identifier, iron_drv_t *drv, char *name, iron_type_t type)
 {
+	iron_t *iron = &iron_instances[identifier];
+
 	// Set hardware driver
 	iron->drv = drv;
 
@@ -70,10 +72,11 @@ void iron_init(iron_t *iron, iron_drv_t *drv, char *name, iron_type_t type)
 	iron->power = 0xFFFF; // 0xFFFF means no power, 0 means full power
 	iron->pid_out = 0.0;
 
-	PIDInit(&iron->pid, 1.5, 0.005, 0.05,
+	PIDInit(&(iron->pid), 1.5, 0.005, 0.05,
 			0.01, 0, PID_OUT_GRANULARITY, AUTOMATIC,
 			DIRECT);
-	PIDSetpointSet(&iron->pid, 0.0);
+	PIDSetpointSet(&(iron->pid), 0.0);
+	return iron;
 }
 
 /* ---------------------------- Setter Functions ---------------------------- */
@@ -87,7 +90,7 @@ void iron_set_setpoint(iron_t *iron, uint16_t temperature)
 	iron->setpoint = temperature;
 	// Immediately update pid setpoint if iron is active
 	if (iron->state == IRON_STATE_ACTIVE)
-		PIDSetpointSet(&iron->pid, (float)iron->setpoint);
+		PIDSetpointSet(&(iron->pid), (float)iron->setpoint);
 
 	// iron_notify_observers(iron);
 }
@@ -161,7 +164,7 @@ static void iron_compute_pid(iron_t *iron)
 	iron->pid.input = iron->temperature_smooth;
 
 	// Compute PID output
-	PIDCompute(&iron->pid);
+	PIDCompute(&(iron->pid));
 }
 
 void iron_heater_disable(iron_t *iron)
@@ -202,7 +205,7 @@ void iron_update_state(iron_t *iron)
 	// A large ADC value (saturation) indicates that the iron is not connected
 	if (iron->temperature > 550.0f)
 	{
-		PIDSetpointSet(&iron->pid, 0.0f);
+		PIDSetpointSet(&(iron->pid), 0.0f);
 		if (iron->state != IRON_STATE_NOT_CONNECTED)
 		{
 			iron->state = IRON_STATE_NOT_CONNECTED;
@@ -216,7 +219,7 @@ void iron_update_state(iron_t *iron)
 	{
 		if (iron->state != IRON_STATE_OFF)
 		{
-			PIDSetpointSet(&iron->pid, 0.0f);
+			PIDSetpointSet(&(iron->pid), 0.0f);
 			iron->state = IRON_STATE_OFF;
 			iron->hibernate_timer = 0; // Reset the hibernate timer
 									   // iron_notify_observers(iron);
@@ -234,7 +237,7 @@ void iron_update_state(iron_t *iron)
 
 		if (new_state != iron->state)
 		{
-			PIDSetpointSet(&iron->pid, new_setpoint);
+			PIDSetpointSet(&(iron->pid), new_setpoint);
 			iron->state = new_state;
 			// iron_notify_observers(iron);
 		}
@@ -251,7 +254,7 @@ void iron_update_state(iron_t *iron)
 
 		if (new_state != iron->state)
 		{
-			PIDSetpointSet(&iron->pid, (float)iron->setpoint);
+			PIDSetpointSet(&(iron->pid), (float)iron->setpoint);
 			iron->state = new_state;
 			iron->hibernate_timer = 0; // Reset the hibernate timer
 									   // iron_notify_observers(iron);
