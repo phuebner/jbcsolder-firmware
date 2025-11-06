@@ -79,7 +79,7 @@ lv_obj_t *screen_iron_create(lv_obj_t *parent, iron_t *iron)
     lv_obj_set_flex_align(iron_tile, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
     lv_obj_set_style_pad_gap(iron_tile, 0, 0);
 
-    lv_obj_t *power_bar = power_bar_create(iron_tile);
+    lv_obj_t *power_bar = power_bar_create(iron_tile, 100);
     // Add extra top margin to power bar to account for titlebar button height
     lv_obj_set_style_margin_top(power_bar, lv_obj_get_style_margin_top(power_bar, 0) + 20, 0);
     power_bar_bind_power(power_bar, user_data->subj_power);

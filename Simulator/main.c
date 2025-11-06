@@ -37,7 +37,7 @@ static uint32_t zero_crossing_callback(uint32_t interval, void *param);
 /**********************
  *  STATIC VARIABLES
  **********************/
-iron_t iron_a;
+iron_t *iron_a;
 static int half_cycle = 0;
 static int cycle = 0;
 /**********************
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   /*Initialize the HAL (display, input devices, tick) for LVGL*/
   hal_init(320, 240);
   // hal_lvgl_encoder_init();
-  iron_init(&iron_a, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
+  iron_a = iron_init(IRON_IDENTIFIER_A, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
 
   lv_display_set_default(disp_sim_ctl);
   simulation_control_screen_create();
@@ -146,6 +146,10 @@ static uint32_t zero_crossing_callback(uint32_t interval, void *param)
 {
   (void)interval; /*Unused*/
   (void)param;    /*Unused*/
+
+  if (iron_a == NULL)
+    return 10; // Return to call this function again in 10 ms
+
   // This function is called every 10 ms
   // to simulate the zero crossing of the AC mains voltage.
   // It is used to trigger the heater control logic.
@@ -153,10 +157,10 @@ static uint32_t zero_crossing_callback(uint32_t interval, void *param)
   // Track half-cycles and cycles to control the heater in alternating periods
   // half_cycle = half_cycle == 1 ? 0 : 1; // alternate between 0 and 1 to track half cycles
   // cycle += half_cycle;                  // increase cycle counter on every second half cycle
-  iron_heater_disable(&iron_a); // Disable the heater before starting a new cycle
-  iron_a.drv->adc_start();      // Start ADC conversion to read the temperature
-  iron_update_state(&iron_a);
-  iron_control_heater(&iron_a); // Control the heater based on the current state and temperature
+  iron_heater_disable(iron_a); // Disable the heater before starting a new cycle
+  iron_start_adc(iron_a);      // Start ADC conversion to read the temperature
+  iron_update_state(iron_a);
+  iron_control_heater(iron_a); // Control the heater based on the current state and temperature
 
   simulate_temperature_change(); // Simulate the soldering iron by changing the adc value
   return 10;                     // Call this function again in 10 ms

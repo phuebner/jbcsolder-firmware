@@ -6,6 +6,7 @@
  */
 #include "iron.h"
 #include "pid.h"
+#include "lfsr.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -14,7 +15,7 @@
 /*                                   DEFINES                                  */
 /* -------------------------------------------------------------------------- */
 
-#define PID_OUT_GRANULARITY 20
+#define PID_OUT_GRANULARITY 100
 #define IRON_TEMPERATURE_MAX 450
 #define IRON_TEMPERATURE_MIN 50
 
@@ -70,9 +71,13 @@ iron_t *iron_init(ironIdentifier_e identifier, iron_drv_t *drv, char *name, iron
 	iron->temperature = 0.0;
 	iron->temperature_smooth = 0.0;
 	iron->power = 0xFFFF; // 0xFFFF means no power, 0 means full power
-	iron->pid_out = 0.0;
+	iron->pid_out = 0.0f;
 
-	PIDInit(&(iron->pid), 1.3, 0, 0.01,
+	iron->accumulator = 0;
+	iron->pos_on_count = 0;
+	iron->neg_on_count = 0;
+
+	PIDInit(&(iron->pid), 3, 0, 0.01,
 			0.01, 0, PID_OUT_GRANULARITY, AUTOMATIC,
 			DIRECT);
 	PIDSetpointSet(&(iron->pid), 0.0);
@@ -122,7 +127,7 @@ float iron_get_power(iron_t *iron)
 {
 	if (!iron->enabled)
 		return 0.0f;
-	return iron->pid.output;
+	return (iron->pid.output / (float)PID_OUT_GRANULARITY) * 100.0f;
 }
 
 iron_state_t iron_get_state(iron_t *iron)
@@ -169,25 +174,48 @@ static void iron_compute_pid(iron_t *iron)
 
 void iron_control_heater(iron_t *iron)
 {
-	// Always increase the heater half cycle counter
-	iron->half_cycle_counter++;
+	static _Bool positive_half_cycle = true; // Track whether we are in a positive or negative half cycle
+	positive_half_cycle = !positive_half_cycle;
 
-	// Calculate the number of half cycles to skip for the heater control (i.e. regulate power)
-	// If PID output is 0, we skip all half cycles (heater off)
-	// If PID output is PID_OUT_GRANULARITY, we skip no half cycles (heater on full power)
-	// Otherwise, we calculate the number of half cycles to skip based on the PID output
-	iron->heater_skip_half_cycles = iron->pid.output == 0 ? 0xFFFF : (uint16_t)(PID_OUT_GRANULARITY + 1 - iron->pid.output);
-	// printf("PID Output: %f, Heater Skip Half Cycles: %d\n", iron->pid.output, iron->heater_skip_half_cycles);
+	// Accumulator for fractional power control
+	// float power_fraction = iron->pid.output / (float)PID_OUT_GRANULARITY; // 0.0 ... 1.0
 
-	// Enable or disable the amplifier based on the state
-	if (iron->state == IRON_STATE_ACTIVE || iron->state == IRON_STATE_SLEEP)
+	// Add desired power each half-cycle
+	iron->accumulator += iron->pid.output;
+
+	bool enable = false;
+
+	if (iron->accumulator >= PID_OUT_GRANULARITY)
 	{
-		if (iron->half_cycle_counter % iron->heater_skip_half_cycles == 0)
+		// Fire this half-cycle
+		enable = true;
+		iron->accumulator -= PID_OUT_GRANULARITY;
+	}
+
+	// Ensure no DC bias builds up, by alternating ON decisions if needed
+	// (balance positive & negative half cycles over time)
+	if (enable)
+	{
+		if (positive_half_cycle)
+			iron->pos_on_count++;
+		else
+			iron->neg_on_count++;
+
+		// If imbalance too large, force skip to avoid DC bias
+		if (iron->pos_on_count - iron->neg_on_count > 1 || iron->neg_on_count - iron->pos_on_count > 1)
 		{
-			// Enable the heater
-			iron->drv->heater_en(true);
+			enable = false; // skip this half-cycle
+			if (positive_half_cycle)
+				iron->pos_on_count--;
+			else
+				iron->neg_on_count--;
+			iron->accumulator += PID_OUT_GRANULARITY; // return credit
 		}
 	}
+
+	// Apply output
+	if (iron->state == IRON_STATE_ACTIVE || iron->state == IRON_STATE_SLEEP)
+		iron->drv->heater_en(enable);
 }
 
 void iron_update_state(iron_t *iron)

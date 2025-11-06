@@ -120,10 +120,6 @@ lv_obj_t *quick_drawer_create(lv_obj_t *parent)
     lv_obj_align(btn_quick3, LV_ALIGN_BOTTOM_LEFT, 0, 0);
     lv_obj_add_event_cb(btn_quick3, btn_event_cb, LV_EVENT_ALL, 3);
 
-    LV_LOG_USER("BTN_ID 1: %d", (int32_t)btn_quick1);
-    LV_LOG_USER("BTN_ID 2: %d", (int32_t)btn_quick2);
-    LV_LOG_USER("BTN_ID 3: %d", (int32_t)btn_quick3);
-
     /* -------------------------------- Separator ------------------------------- */
     lv_obj_t *line1 = quick_drawer_separator_create(quick_drawer);
     lv_obj_align(line1, LV_ALIGN_CENTER, 0, (drawer_height / 6));

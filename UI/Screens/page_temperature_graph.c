@@ -95,7 +95,7 @@ lv_obj_t *page_temperature_graph_create(lv_obj_t *parent, iron_t *iron)
     lv_obj_set_flex_grow(chart, 1);
     lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
     lv_obj_set_style_size(chart, 0, 0, LV_PART_INDICATOR);
-    lv_chart_set_point_count(chart, 120); /* keep 120 points (~12s at 100ms) */
+    lv_chart_set_point_count(chart, 300); /* keep 300 points (~30s at 100ms) */
     lv_chart_set_update_mode(chart, LV_CHART_UPDATE_MODE_SHIFT);
     lv_chart_set_div_line_count(chart, 4, 5);
     lv_obj_set_style_border_width(chart, 0, LV_PART_MAIN);
@@ -108,8 +108,8 @@ lv_obj_t *page_temperature_graph_create(lv_obj_t *parent, iron_t *iron)
 
     /* Primary Y range for temperature (degrees C) */
     lv_chart_set_axis_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 500);
-    /* Secondary Y range for power (PID output) - use small range (20 = granularity) */
-    lv_chart_set_axis_range(chart, LV_CHART_AXIS_SECONDARY_Y, 0, 22);
+    /* Secondary Y range for power in percent */
+    lv_chart_set_axis_range(chart, LV_CHART_AXIS_SECONDARY_Y, 0, 100); // Power in percent
 
     /* Create two series */
     ud->ser_temp = lv_chart_add_series(chart, COLOR_PRIMARY, LV_CHART_AXIS_PRIMARY_Y);                      /* orange */

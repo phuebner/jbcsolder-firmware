@@ -3,6 +3,7 @@
 #include "adc.h"
 #include "tim.h"
 #include "iron.h"
+#include "lfsr.h"
 #include <stdbool.h>
 
 /* -------------------------------------------------------------------------- */
@@ -83,7 +84,17 @@ void iron_timer_irq_handler()
         iron_update_state(iron_a);                        // Update iron status based on iron in stand and sleep timer
         iron_enable_amplifier(iron_a, false);             // Disable thermocouple amplifier after reading temperature
         iron_hardware_state = IRON_HW_STATE_CONTROL_IRON; // Next we process ADC
-        __HAL_TIM_SET_AUTORELOAD(&htim7, 50);             // 10us
+
+#if 1
+        // Add some jitter to avoid fixed timing and reduce EMI
+        const uint16_t JITTER_MIN_US = 50;
+        const uint16_t JITTER_MAX_US = 30;
+        uint32_t r = lfsr_next() & 0xFFFF;
+        uint32_t jitter = (r * JITTER_MAX_US) >> 16;              // uniform 0..jitter_max_us
+        __HAL_TIM_SET_AUTORELOAD(&htim7, JITTER_MIN_US + jitter); // Jitter delay
+#else
+        __HAL_TIM_SET_AUTORELOAD(&htim7, 50);
+#endif
         HAL_TIM_Base_Start_IT(&htim7);
         break;
     case IRON_HW_STATE_CONTROL_IRON:

@@ -5,8 +5,8 @@
  *      Author: patrick
  */
 
-#ifndef SRC_IRON_H_
-#define SRC_IRON_H_
+#ifndef IRON
+#define IRON
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -106,13 +106,14 @@ struct _iron_t
     iron_state_t state;       /** Current state of the soldering iron */
     _Bool enabled;            /** Whether the soldering iron is enabled or not */
     uint32_t hibernate_timer; /** Hibernate timer counts up till it reaches cfg.hibernate_delay */
-    PIDControl pid;
     uint16_t power;
+
+    /* Heater control */
+    PIDControl pid;
     float pid_out;
-    uint32_t half_cycle_counter;                   /** Heater half cycle counter for controlling the heater in alternating periods */
-    uint32_t heater_skip_half_cycles;              /** Number of half cycles to skip for the heater control, 0xFFFF means no power, 0 means full power */
-    iron_observer_t observers[IRON_MAX_OBSERVERS]; /** Array of observer callbacks for state changes */
-    uint8_t observer_count;                        /** Current number of registered observers */
+    int16_t pos_on_count;
+    int16_t neg_on_count;
+    int16_t accumulator;
 };
 /* -------------------------------------------------------------------------- */
 /*                              GLOBAL PROTOTYPES                              */
@@ -182,4 +183,4 @@ static inline void iron_start_adc(iron_t *iron)
 void iron_control_heater(iron_t *iron);
 void iron_update_state(iron_t *iron);
 
-#endif /* SRC_IRON_H_ */
+#endif /* IRON */

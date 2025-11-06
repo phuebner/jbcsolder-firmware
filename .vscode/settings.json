@@ -1,6 +1,6 @@
 {
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.variableUseNaturalFormat": true,
     "files.associations": {
         "mouse.h": "c",
         "main_screen.h": "c",
@@ -27,7 +27,9 @@
         "screen_iron.h": "c",
         "cstdlib": "c",
         "lv_obj_private.h": "c",
-        "map": "c"
+        "map": "c",
+        "cmath": "c",
+        "cinttypes": "c"
     },
     "cSpell.words": [
         "hadc"

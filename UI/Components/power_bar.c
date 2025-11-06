@@ -29,7 +29,7 @@ static void setup_styles()
     lv_style_set_radius(&sty_power_bar_bg, 4);
 }
 
-lv_obj_t *power_bar_create(lv_obj_t *parent)
+lv_obj_t *power_bar_create(lv_obj_t *parent, int32_t range)
 {
     setup_styles();
 
@@ -39,7 +39,7 @@ lv_obj_t *power_bar_create(lv_obj_t *parent)
 
     lv_obj_set_size(bar_power, POWER_BAR_WIDTH, lv_pct(100));
 
-    lv_bar_set_range(bar_power, 0, 20);
+    lv_bar_set_range(bar_power, 0, range);
     lv_bar_set_value(bar_power, 0, LV_ANIM_ON);
     return bar_power;
 }
