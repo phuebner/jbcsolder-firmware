@@ -18,12 +18,14 @@
 #include "titlebar.h"
 #include "titlebar_button.h"
 #include "quick_drawer.h"
+#include "input_devices.h"
 #include "power_bar.h"
 #include "iron.h" // Ensure this is included for iron_a definition
 
 // If iron_a is not defined in any header, declare it here as extern
 // TODO: Remove this line if iron_a is defined in iron.h or another included header
 extern iron_t *iron_a;
+extern lv_indev_t *enc_indev;
 
 /* -------------------------------------------------------------------------- */
 /*                                   DEFINES                                  */
@@ -40,7 +42,7 @@ static void setup_styles(void);
 static void setup_encoder_target(void);
 static void setup_titlebar(void);
 static void setup_main_screen(void);
-// static void encoder_target_event_cb(lv_obj_t *obj, lv_event_t event);
+static void encoder_target_event_cb(lv_event_t *e);
 // LV_EVENT_CB_DECLARE(encoder_target_event_cb);
 // LV_EVENT_CB_DECLARE(btn_inc_setpoint_event_cb);
 // LV_EVENT_CB_DECLARE(btn_dec_setpoint_event_cb);
@@ -122,7 +124,7 @@ static void create_main_screen(void)
     lv_obj_clear_flag(scr_home, LV_OBJ_FLAG_SCROLLABLE);
     lv_scr_load(scr_home);
 
-    // setup_encoder_target();
+    setup_encoder_target();
     setup_main_screen();
     setup_titlebar();
     // initial_run = true;
@@ -140,15 +142,15 @@ static void setup_styles(void)
 
 static void setup_encoder_target(void)
 {
-    // /* Setup hidden object as target for encoder events */
-    // g = lv_group_create();
-    // lv_indev_set_group(enc_indev, g);
-    // lv_obj_t *encoder_target = lv_obj_create(lv_scr_act(), NULL);
+    /* Setup hidden object as target for encoder events */
+    g = lv_group_create();
+    lv_indev_set_group(enc_indev, g);
+    lv_obj_t *encoder_target = lv_obj_create(lv_screen_active());
     // lv_obj_set_hidden(encoder_target, true);
-    // lv_group_add_obj(g, encoder_target);
-    // lv_obj_set_event_cb(encoder_target, encoder_target_event_cb);
-    // lv_group_focus_obj(encoder_target);
-    // lv_group_set_editing(g, true);
+    lv_group_add_obj(g, encoder_target);
+    lv_obj_add_event_cb(encoder_target, encoder_target_event_cb, LV_EVENT_KEY, iron_a);
+    lv_group_focus_obj(encoder_target);
+    lv_group_set_editing(g, true);
 }
 
 static void setup_titlebar(void)
@@ -357,28 +359,32 @@ static void setup_main_screen(void)
 /*                               EVENT CALLBACKS                              */
 /* -------------------------------------------------------------------------- */
 
-// static void encoder_target_event_cb(lv_obj_t *obj, lv_event_t event);
-// {
+static void encoder_target_event_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *target = lv_event_get_target(e);
+    const uint32_t *key = lv_event_get_param(e);
+    iron_t *iron = (iron_t *)lv_event_get_user_data(e);
 
-//     if (e == LV_EVENT_KEY)
-//     {
-//         const uint32_t *key = lv_event_get_data();
+    if (code != LV_EVENT_KEY)
+        return;
 
-//         switch (*key)
-//         {
-//         case LV_KEY_RIGHT:
-//             iron_set_setpoint(iron_get_setpoint() + SETPOINT_STEP_SIZE);
-//             break;
-//         case LV_KEY_LEFT:
-//             iron_set_setpoint(iron_get_setpoint() - SETPOINT_STEP_SIZE);
-//             break;
-//         }
-//     }
-//     else if (e == LV_EVENT_PRESSED)
-//     {
-//         // iron_set_enable(!iron_is_enabled());
-//     }
-// }
+    if (iron == NULL)
+        return;
+
+    switch (*key)
+    {
+    case LV_KEY_RIGHT:
+        iron_set_setpoint(iron, iron_get_setpoint(iron) + SETPOINT_STEP_SIZE);
+        break;
+    case LV_KEY_LEFT:
+        iron_set_setpoint(iron, iron_get_setpoint(iron) - SETPOINT_STEP_SIZE);
+        break;
+    case LV_KEY_ENTER:
+        iron_set_enable(iron, !iron_is_enabled(iron));
+        break;
+    }
+}
 
 // LV_EVENT_CB_DECLARE(btn_inc_setpoint_event_cb)
 // {

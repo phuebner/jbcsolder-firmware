@@ -30,14 +30,14 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "delay.h"
-#include "lv_port_disp.h"
-#include "lv_port_indev_touchscreen.h"
-#include "lv_port_indev_encoder.h"
 
 #include "iron.h"
 #include "iron_drv.h"
 
 #include "lvgl.h"
+#include "lv_port_disp.h"
+#include "input_devices.h"
+
 // #include "hal_lvgl_touch.h"
 // #include "hal_lvgl_encoder.h"
 
@@ -129,10 +129,9 @@ int main(void)
   iron_a = iron_init(IRON_IDENTIFIER_A, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
 
   // Initialize LVGL
-  lv_init();                        // Initialize LVGL
-  lv_port_disp_init();              // Initialize the display hardware for LVGL
-  lv_port_indev_touchscreen_init(); // Initialize the touchscreen hardware for LVGL
-  lv_port_indev_encoder_init();     // Initialize the encoder hardware for LVGL
+  lv_init();           // Initialize LVGL
+  lv_port_disp_init(); // Initialize display driver
+  InputDevices_Init(); // Initialize input devices
 
   // HAL_Delay(10);
   // display_fill(0, 0, DISP_HOR, DISP_VER, 0xFFFF, NULL);
@@ -140,7 +139,6 @@ int main(void)
   // tft_init();
   // hal_lvgl_touch_init();
 
-  // HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
   // hal_lvgl_encoder_init();
 
   Buzzer_Init();

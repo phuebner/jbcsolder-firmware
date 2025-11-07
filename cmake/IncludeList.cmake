@@ -35,8 +35,8 @@ set(INCLUDE_DIRS_FIRMWARE
     ${PROJ_PATH}/Core/Src
     ${PROJ_PATH}/Utilities
     ${PROJ_PATH}/Hardware/Devices
+    ${PROJ_PATH}/Hardware/LvPort
     ${PROJ_PATH}/Application
-    ${PROJ_PATH}/UI/Driver
     ${INCLUDE_DIRS_UI}
 )
 
@@ -44,7 +44,7 @@ set(INCLUDE_DIRS_SIMULATOR
     ${INCLUDE_DIRS_LVGL}
     ${PROJ_PATH}/Application
     ${PROJ_PATH}/Utilities
+    ${PROJ_PATH}/Hardware/Devices
     ${INCLUDE_DIRS_UI}
-    ${PROJ_PATH}/UI/Driver
     ${PROJ_PATH}/Simulator
 )

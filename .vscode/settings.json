@@ -29,7 +29,9 @@
         "lv_obj_private.h": "c",
         "map": "c",
         "cmath": "c",
-        "cinttypes": "c"
+        "cinttypes": "c",
+        "input_devices.h": "c",
+        "simulation_control_screen.h": "c"
     },
     "cSpell.words": [
         "hadc"

@@ -21,6 +21,7 @@ file(GLOB_RECURSE LVGL_COMMON_SOURCES CONFIGURE_DEPENDS
 file(GLOB_RECURSE FIRMWARE_APPLICATION_SOURCES CONFIGURE_DEPENDS
     ${PROJ_PATH}/Core/Src/*.c
     ${PROJ_PATH}/Hardware/Devices/*.c
+    ${PROJ_PATH}/Hardware/LvPort/*.c
     ${PROJ_PATH}/Application/*.c
     ${PROJ_PATH}/UI/Driver/*.c
     ${PROJ_PATH}/UI/Components/*.c

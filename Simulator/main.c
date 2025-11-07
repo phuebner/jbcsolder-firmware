@@ -14,6 +14,7 @@
 #include "iron.h"
 #include "iron_driver_moc.h"
 #include "main_screen.h"
+#include "input_devices.h"
 
 // #include "../Core/Src/drv/lv_port_indev_encoder.h"
 
@@ -38,8 +39,7 @@ static uint32_t zero_crossing_callback(uint32_t interval, void *param);
  *  STATIC VARIABLES
  **********************/
 iron_t *iron_a;
-static int half_cycle = 0;
-static int cycle = 0;
+
 /**********************
  *      MACROS
  **********************/
@@ -60,14 +60,16 @@ int main(int argc, char **argv)
 
   /*Initialize the HAL (display, input devices, tick) for LVGL*/
   hal_init(320, 240);
+  InputDevices_Init();
+
   // hal_lvgl_encoder_init();
   iron_a = iron_init(IRON_IDENTIFIER_A, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
 
   lv_display_set_default(disp_sim_ctl);
   simulation_control_screen_create();
-
   lv_display_set_default(disp_main);
-  gui_init();
+
+    gui_init();
 
   SDL_TimerID timerID = SDL_AddTimer(10, zero_crossing_callback, NULL); // 50 Hz voltage zero crossing simulation (zero crossing every 10 ms)
   if (timerID == 0)
@@ -112,24 +114,12 @@ static void hal_init(int32_t w, int32_t h)
 
   lv_group_set_default(lv_group_create());
 
-  disp_main = lv_sdl_window_create(w, h);
+  // Create the display windows
+  // The order here matters for setting the default display
   disp_sim_ctl = lv_sdl_window_create(w, h);
+  disp_main = lv_sdl_window_create(w, h);
 
-  lv_indev_t *mouse = lv_sdl_mouse_create();
-  lv_indev_set_group(mouse, lv_group_get_default());
-  lv_indev_set_display(mouse, disp_main);
-
-  lv_indev_t *mouse_sim_ctl = lv_sdl_mouse_create();
-  lv_indev_set_group(mouse_sim_ctl, lv_group_get_default());
-  lv_indev_set_display(mouse_sim_ctl, disp_sim_ctl);
-
-  lv_indev_t *mousewheel = lv_sdl_mousewheel_create();
-  lv_indev_set_display(mousewheel, disp_main);
-  lv_indev_set_group(mousewheel, lv_group_get_default());
-
-  lv_indev_t *kb = lv_sdl_keyboard_create();
-  lv_indev_set_display(kb, disp_main);
-  lv_indev_set_group(kb, lv_group_get_default());
+  lv_display_set_default(disp_main);
 
   /* -------- Set up position of the two windows and handle exit events ------- */
   SDL_Window *window_disp_main = lv_sdl_window_get_window(disp_main);
