@@ -5,7 +5,7 @@ set(STARTUP_SCRIPT
 
 ### STM32 DRIVER SOURCES
 file(GLOB_RECURSE STM32_DRIVER_SOURCES CONFIGURE_DEPENDS
-    ${PROJ_PATH}/Drivers/STM32F7xx_HAL_Driver/Src/*c
+    ${PROJ_PATH}/3rd_party/STM32F7xx_HAL_Driver/Src/*c
     ${PROJ_PATH}/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c
     ${PROJ_PATH}/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/*c
     ${PROJ_PATH}/USB_DEVICE/*c
@@ -13,8 +13,16 @@ file(GLOB_RECURSE STM32_DRIVER_SOURCES CONFIGURE_DEPENDS
 
 ### LVGL COMMON SOURCES
 file(GLOB_RECURSE LVGL_COMMON_SOURCES CONFIGURE_DEPENDS
-    ${PROJ_PATH}/Drivers/lvgl_custom_fonts/*.c
-    ${PROJ_PATH}/Drivers/lvgl/src/*.c
+    ${PROJ_PATH}/3rd_party/lvgl/src/*.c
+)
+
+### UI SOURCES
+file(GLOB_RECURSE UI_SOURCES CONFIGURE_DEPENDS
+    ${PROJ_PATH}/UI/Components/*.c
+    ${PROJ_PATH}/UI/Screens/*.c
+    ${PROJ_PATH}/UI/Themes/*.c
+    ${PROJ_PATH}/UI/Images/*.c
+    ${PROJ_PATH}/UI/Fonts/*.c
 )
 
 ### FIRMWARE APPLICATION SOURCES
@@ -23,10 +31,6 @@ file(GLOB_RECURSE FIRMWARE_APPLICATION_SOURCES CONFIGURE_DEPENDS
     ${PROJ_PATH}/Hardware/Devices/*.c
     ${PROJ_PATH}/Hardware/LvPort/*.c
     ${PROJ_PATH}/Application/*.c
-    ${PROJ_PATH}/UI/Driver/*.c
-    ${PROJ_PATH}/UI/Components/*.c
-    ${PROJ_PATH}/UI/Screens/*.c
-    ${PROJ_PATH}/UI/Themes/*.c
     ${PROJ_PATH}/Config/*.c
     ${PROJ_PATH}/Utilities/*.c
 )
@@ -36,20 +40,19 @@ file(GLOB_RECURSE FIRMWARE_APPLICATION_SOURCES CONFIGURE_DEPENDS
 file(GLOB_RECURSE SIMULATOR_APPLICATION_SOURCES CONFIGURE_DEPENDS
     ${PROJ_PATH}/Simulator/*.c
     ${PROJ_PATH}/Application/*.c
-    ${PROJ_PATH}/UI/Components/*.c
-    ${PROJ_PATH}/UI/Screens/*.c
-    ${PROJ_PATH}/UI/Themes/*.c
     ${PROJ_PATH}/Utilities/*.c
 )
 
 set(FIRMWARE_SOURCES
     ${STM32_DRIVER_SOURCES}
     ${LVGL_COMMON_SOURCES}
+    ${UI_SOURCES}
     ${FIRMWARE_APPLICATION_SOURCES}
     ${STARTUP_SCRIPT}
 )
 
 set(SIMULATOR_SOURCES
     ${LVGL_COMMON_SOURCES}
+    ${UI_SOURCES}
     ${SIMULATOR_APPLICATION_SOURCES}
 )

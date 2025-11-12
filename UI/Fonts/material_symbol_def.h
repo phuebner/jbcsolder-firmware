@@ -1,0 +1,8 @@
+#ifndef MATERIAL_SYMBOL_DEF
+#define MATERIAL_SYMBOL_DEF
+
+#if !defined MATERIAL_SYMBOL_ARROW_BACK
+#define MATERIAL_SYMBOL_ARROW_BACK "\xEE\x97\x84" // 0xe5c4
+#endif
+
+#endif /* MATERIAL_SYMBOL_DEF */

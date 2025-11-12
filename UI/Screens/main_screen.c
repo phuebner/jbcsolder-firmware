@@ -111,6 +111,7 @@ void gui_init(void)
     // lv_theme_set_act(theme);
     setup_styles();
 
+    scr_menu = create_menu_screen(return_to_home_event_cb);
     create_main_screen();
 }
 
@@ -121,8 +122,8 @@ void gui_init(void)
 static void create_main_screen(void)
 {
     scr_home = lv_obj_create(NULL);
-    lv_obj_clear_flag(scr_home, LV_OBJ_FLAG_SCROLLABLE);
-    lv_scr_load(scr_home);
+    lv_obj_remove_flag(scr_home, LV_OBJ_FLAG_SCROLLABLE);
+    lv_screen_load(scr_home);
 
     setup_encoder_target();
     setup_main_screen();
@@ -189,7 +190,7 @@ static void setup_main_screen(void)
 
     // static lv_point_t valid_pos[] = {{0, 0}, {0, 1}};
 
-    tileview = lv_tileview_create(lv_scr_act());
+    tileview = lv_tileview_create(lv_screen_active());
     lv_obj_t *tile_main = lv_tileview_add_tile(tileview, 0, 0, LV_DIR_BOTTOM);
     lv_obj_t *tile_graph = lv_tileview_add_tile(tileview, 0, 1, LV_DIR_TOP);
     lv_obj_set_scrollbar_mode(tileview, LV_SCROLLBAR_MODE_OFF);
@@ -362,7 +363,6 @@ static void setup_main_screen(void)
 static void encoder_target_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t *target = lv_event_get_target(e);
     const uint32_t *key = lv_event_get_param(e);
     iron_t *iron = (iron_t *)lv_event_get_user_data(e);
 
@@ -385,18 +385,6 @@ static void encoder_target_event_cb(lv_event_t *e)
         break;
     }
 }
-
-// LV_EVENT_CB_DECLARE(btn_inc_setpoint_event_cb)
-// {
-//     if (e == LV_EVENT_CLICKED)
-//         iron_set_setpoint(iron_get_setpoint() + SETPOINT_STEP_SIZE);
-// }
-
-// LV_EVENT_CB_DECLARE(btn_dec_setpoint_event_cb)
-// {
-//     if (e == LV_EVENT_CLICKED)
-//         iron_set_setpoint(iron_get_setpoint() - SETPOINT_STEP_SIZE);
-// }
 
 static void btn_quick_event_cb(lv_event_t *e)
 {
@@ -538,28 +526,25 @@ static void btn_quick_event_cb(lv_event_t *e)
 static void switch_to_menu_event_cb(lv_event_t *event)
 {
 
-    if (quick_drawer_is_hidden(box_presets))
-    {
-        quick_drawer_show(box_presets);
-    }
-    else
-    {
-        quick_drawer_hide(box_presets);
-    }
-    //     if (event == LV_EVENT_CLICKED)
-    //     {
-    //         lv_task_del(main_screen_task_handle);
-    //         lv_obj_del(scr_home);
-    //         scr_menu = create_menu_screen(return_to_home_event_cb);
-    //     }
+    // lv_task_del(main_screen_task_handle);
+    // lv_obj_delete_async(scr_home);
+    // lv_screen_load(scr_menu);
+    lv_indev_set_group(enc_indev, lv_group_get_default());
+    quick_drawer_hide(box_presets);
+    lv_screen_load_anim(scr_menu, LV_SCR_LOAD_ANIM_OVER_BOTTOM, 300, 0, false);
+    // lv_screen_load_anim(scr_menu, LV_SCR_LOAD_ANIM_OVER_BOTTOM, 300, 0, false);
 }
 
 static void return_to_home_event_cb(lv_event_t *event)
 {
     //     if (event == LV_EVENT_CLICKED)
     //     {
-    //         lv_obj_del(lv_scr_act());
-    //         create_main_screen();
+    // lv_obj_delete(lv_screen_active());
+    // create_main_screen();
+    // lv_screen_load(scr_home);
+    lv_indev_set_group(enc_indev, g);
+    lv_screen_load_anim(scr_home, LV_SCR_LOAD_ANIM_OUT_TOP, 300, 0, false);
+    quick_drawer_show(box_presets);
     //     }
 }
 

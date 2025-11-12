@@ -35,6 +35,82 @@ else()
 endif()
 
 
+# Function to convert PNG images to C files using LVGL converter
+function(convert_images_to_c)
+    # Find all PNG files in UI/Images directory
+    file(GLOB PNG_FILES "${CMAKE_CURRENT_SOURCE_DIR}/UI/Images/*.png")
+    
+    set(HEADER_CONTENT "")
+    string(APPEND HEADER_CONTENT "#ifndef UI_IMAGES_H\n")
+    string(APPEND HEADER_CONTENT "#define UI_IMAGES_H\n\n")
+    string(APPEND HEADER_CONTENT "#ifdef __cplusplus\n")
+    string(APPEND HEADER_CONTENT "extern \"C\" {\n")
+    string(APPEND HEADER_CONTENT "#endif\n\n")
+    string(APPEND HEADER_CONTENT "#if defined(LV_LVGL_H_INCLUDE_SIMPLE)\n")
+    string(APPEND HEADER_CONTENT "#include \"lvgl.h\"\n")
+    string(APPEND HEADER_CONTENT "#elif defined(LV_LVGL_H_INCLUDE_SYSTEM)\n")
+    string(APPEND HEADER_CONTENT "#include <lvgl.h>\n")
+    string(APPEND HEADER_CONTENT "#elif defined(LV_BUILD_TEST)\n")
+    string(APPEND HEADER_CONTENT "#include \"../lvgl.h\"\n")
+    string(APPEND HEADER_CONTENT "#else\n")
+    string(APPEND HEADER_CONTENT "#include \"lvgl/lvgl.h\"\n")
+    string(APPEND HEADER_CONTENT "#endif\n\n")
+    string(APPEND HEADER_CONTENT "// Generated image declarations\n")
+    
+    foreach(PNG_FILE ${PNG_FILES})
+        # Get the filename without extension
+        get_filename_component(PNG_NAME ${PNG_FILE} NAME_WE)
+        
+        # Convert hyphens to underscores for C variable names
+        string(REPLACE "-" "_" C_VAR_NAME ${PNG_NAME})
+        
+        # Define output C file path
+        set(C_FILE "${CMAKE_CURRENT_SOURCE_DIR}/UI/Images/${PNG_NAME}.c")
+        
+        # Add custom command to convert PNG to C
+        add_custom_command(
+            OUTPUT ${C_FILE}
+            COMMAND ${CMAKE_COMMAND} -E echo "Converting ${PNG_NAME}.png to C file..."
+            COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/lvgl/scripts/LVGLImage.py 
+                    --ofmt C 
+                    --cf AUTO 
+                    --name ${C_VAR_NAME}
+                    -o ${CMAKE_CURRENT_SOURCE_DIR}/UI/Images
+                    ${PNG_FILE}
+            DEPENDS ${PNG_FILE}
+            COMMENT "Converting ${PNG_FILE} to ${C_FILE}"
+            VERBATIM
+        )
+        
+        # Add the generated C file to a list
+        list(APPEND GENERATED_IMAGE_FILES ${C_FILE})
+        
+        # Add declaration to header content
+        string(APPEND HEADER_CONTENT "extern const lv_image_dsc_t ${C_VAR_NAME}\;\n")
+    endforeach()
+    
+    # Complete the header file
+    string(APPEND HEADER_CONTENT "\n#ifdef __cplusplus\n")
+    string(APPEND HEADER_CONTENT "}\n")
+    string(APPEND HEADER_CONTENT "#endif\n\n")
+    string(APPEND HEADER_CONTENT "#endif // UI_IMAGES_H\n")
+    
+    # Generate the header file
+    set(HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/UI/Images/ui_images.h")
+    file(WRITE ${HEADER_FILE} ${HEADER_CONTENT})
+    
+    # Create a custom target that depends on all generated C files
+    if(GENERATED_IMAGE_FILES)
+        add_custom_target(convert_images ALL DEPENDS ${GENERATED_IMAGE_FILES})
+    endif()
+    
+    # Set the variable in parent scope so it can be used elsewhere
+    set(GENERATED_IMAGE_FILES ${GENERATED_IMAGE_FILES} PARENT_SCOPE)
+endfunction()
+
+# Convert images before including source lists
+convert_images_to_c()
+
 # Include List, Source List, and MCU Sepecific Setting
 # Must Update these files in cmake/ when adding new source files
 include(SourceList)
@@ -44,6 +120,11 @@ if(BUILD_SIMULATOR)
 	set(EXECUTABLE		${CMAKE_PROJECT_NAME}-simulator)
 	add_executable(${EXECUTABLE} ${SIMULATOR_SOURCES})
 	target_include_directories(${EXECUTABLE} PRIVATE ${INCLUDE_DIRS_SIMULATOR})
+	
+	# Ensure images are converted before building
+	if(TARGET convert_images)
+		add_dependencies(${EXECUTABLE} convert_images)
+	endif()
 
 	target_compile_options(${EXECUTABLE} PRIVATE -O0 -g -Wall -Wextra -Wshadow -Wundef -Wmaybe-uninitialized -Wmissing-prototypes -Wno-discarded-qualifiers 
 	-Wno-unused-function -Wno-error=strict-prototypes -Wpointer-arith -fno-strict-aliasing -Wno-error=cpp -Wuninitialized 
@@ -73,6 +154,11 @@ else()
 
 	add_executable(${EXECUTABLE} ${FIRMWARE_SOURCES})
 	target_include_directories(${EXECUTABLE} PRIVATE ${INCLUDE_DIRS_FIRMWARE})
+	
+	# Ensure images are converted before building
+	if(TARGET convert_images)
+		add_dependencies(${EXECUTABLE} convert_images)
+	endif()
 
 	# Project symbols
 	target_compile_definitions(${EXECUTABLE} PRIVATE ${compiler_define} "LV_LVGL_H_INCLUDE_SIMPLE")

@@ -1,8 +1,6 @@
 #include "quick_drawer.h"
 #include "theme.h"
 
-LV_FONT_DECLARE(font_roboto_24_regular);
-
 static lv_style_t sty_quick_drawer;
 static lv_style_t sty_btn_quick_drawer;
 static lv_style_t sty_btn_quick_drawer_pressed;
@@ -44,7 +42,7 @@ static void setup_styles()
 
     // Text style for buttons
     lv_style_set_text_color(&sty_btn_quick_drawer, lv_color_white());
-    lv_style_set_text_font(&sty_btn_quick_drawer, &font_roboto_24_regular);
+    lv_style_set_text_font(&sty_btn_quick_drawer, &font_roboto_regular_24);
 
     // Pressed style for buttons (on top of quick drawer main style and button style)
     lv_style_init(&sty_btn_quick_drawer_pressed);

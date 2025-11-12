@@ -1,8 +1,7 @@
 #include "titlebar_button.h"
+#include "theme.h"
 
 static const lv_coord_t TITLEBAR_BUTTON_HEIGHT = 55;
-
-LV_FONT_DECLARE(lv_font_symbols_28);
 
 static lv_style_t sty_btn_titlebar;
 
@@ -10,12 +9,12 @@ static void setup_styles()
 {
     lv_style_init(&sty_btn_titlebar);
     lv_style_set_bg_opa(&sty_btn_titlebar, LV_OPA_COVER);
-    lv_style_set_bg_color(&sty_btn_titlebar, lv_palette_main(LV_PALETTE_RED));
+    lv_style_set_bg_color(&sty_btn_titlebar, COLOR_BG_TITLEBAR);
     lv_style_set_border_width(&sty_btn_titlebar, 0);
     lv_style_set_shadow_width(&sty_btn_titlebar, 0);
     lv_style_set_radius(&sty_btn_titlebar, 20);
-    lv_style_set_text_color(&sty_btn_titlebar, lv_color_white());
-    lv_style_set_text_font(&sty_btn_titlebar, &lv_font_symbols_28);
+    lv_style_set_text_color(&sty_btn_titlebar, COLOR_WHITE);
+    lv_style_set_text_font(&sty_btn_titlebar, &lv_font_montserrat_28);
 }
 
 lv_obj_t *titlebar_button_create(lv_obj_t *parent)

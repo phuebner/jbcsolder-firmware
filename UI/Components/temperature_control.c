@@ -1,7 +1,5 @@
 #include "temperature_control.h"
 
-LV_FONT_DECLARE(font_roboto_regular_28_num);
-
 static lv_style_t sty_container;
 static lv_style_t sty_button;
 static lv_style_t sty_label;

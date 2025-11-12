@@ -47,6 +47,29 @@ static void page_temp_graph_timer_cb(lv_timer_t *timer)
     }
 }
 
+static void page_temp_graph_delete_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code != LV_EVENT_DELETE)
+        return;
+
+    lv_obj_t *cont = lv_event_get_target(e);
+    page_temp_graph_ud_t *ud = (page_temp_graph_ud_t *)lv_obj_get_user_data(cont);
+
+    if (ud)
+    {
+        /* Clean up timer */
+        if (ud->timer)
+        {
+            lv_timer_delete(ud->timer);
+            ud->timer = NULL;
+        }
+
+        /* Clean up user data */
+        lv_free(ud);
+    }
+}
+
 lv_obj_t *page_temperature_graph_create(lv_obj_t *parent, iron_t *iron)
 {
     /* Allocate and init userdata */
@@ -147,6 +170,9 @@ lv_obj_t *page_temperature_graph_create(lv_obj_t *parent, iron_t *iron)
 
     /* Store user data on container so it can be cleaned up later if needed */
     lv_obj_set_user_data(cont, ud);
+
+    /* Add delete event handler for cleanup */
+    lv_obj_add_event_cb(cont, page_temp_graph_delete_cb, LV_EVENT_DELETE, NULL);
 
     /* Create timer to update subjects and chart every 100ms */
     ud->timer = lv_timer_create(page_temp_graph_timer_cb, 100, ud);

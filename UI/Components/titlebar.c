@@ -1,5 +1,6 @@
 #include "titlebar.h"
 #include "iron.h"
+#include "theme.h"
 
 static const lv_coord_t TITLEBAR_HEIGHT = 35;
 
@@ -13,16 +14,16 @@ static void setup_styles()
 {
     lv_style_init(&sty_titlebar);
     lv_style_set_bg_opa(&sty_titlebar, LV_OPA_COVER);
-    lv_style_set_bg_color(&sty_titlebar, lv_palette_main(LV_PALETTE_RED));
+    lv_style_set_bg_color(&sty_titlebar, COLOR_BG_TITLEBAR);
     lv_style_set_border_width(&sty_titlebar, 0);
     lv_style_set_shadow_width(&sty_titlebar, 0);
     lv_style_set_radius(&sty_titlebar, 0);
     lv_style_set_text_color(&sty_titlebar, lv_color_white());
-    lv_style_set_text_font(&sty_titlebar, &lv_font_montserrat_24);
+    lv_style_set_text_font(&sty_titlebar, &font_roboto_regular_24);
     lv_style_set_pad_all(&sty_titlebar, 0);
 
     lv_style_init(&sty_titlebar_button_checked);
-    lv_style_set_bg_color(&sty_titlebar_button_checked, lv_palette_main(LV_PALETTE_AMBER));
+    lv_style_set_bg_color(&sty_titlebar_button_checked, COLOR_BG_TITLEBAR);
 }
 
 lv_obj_t *titlebar_create(lv_obj_t *parent)

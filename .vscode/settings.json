@@ -31,7 +31,8 @@
         "cmath": "c",
         "cinttypes": "c",
         "input_devices.h": "c",
-        "simulation_control_screen.h": "c"
+        "simulation_control_screen.h": "c",
+        "material_symbol_def.h": "c"
     },
     "cSpell.words": [
         "hadc"

@@ -1,9 +1,6 @@
 #include "iron_status.h"
 #include "iron.h"
 
-LV_FONT_DECLARE(lv_font_roboto_18);
-LV_FONT_DECLARE(lv_font_roboto_40);
-
 static lv_style_t sty_container;
 static lv_style_t sty_lbl_status;
 static lv_style_t sty_lbl_msg;
@@ -38,10 +35,10 @@ static void setup_styles()
     lv_style_set_flex_cross_place(&sty_container, LV_FLEX_ALIGN_CENTER);
 
     lv_style_init(&sty_lbl_status);
-    lv_style_set_text_font(&sty_lbl_status, &lv_font_roboto_40);
+    lv_style_set_text_font(&sty_lbl_status, &font_roboto_regular_36);
 
     lv_style_init(&sty_lbl_msg);
-    lv_style_set_text_font(&sty_lbl_msg, &lv_font_roboto_18);
+    lv_style_set_text_font(&sty_lbl_msg, &font_roboto_regular_18);
 }
 
 lv_obj_t *iron_status_create(lv_obj_t *parent)

@@ -21,7 +21,7 @@ void simulation_control_screen_create()
     // Create a label to display simulation status
     lv_obj_t *lbl_status = lv_label_create(screen);
     lv_label_set_text(lbl_status, "Iron A");
-    lv_obj_set_style_text_font(lbl_status, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_font(lbl_status, &font_roboto_regular_24, 0);
 
     // Create buttons to control simulation
 

@@ -6,13 +6,11 @@
 #include "iron_viewmodel.h"
 #include <stdio.h>
 
-LV_FONT_DECLARE(lv_font_roboto_80);
-LV_FONT_DECLARE(lv_font_roboto_40);
-
 /* --------------------------------- Styles --------------------------------- */
 static lv_style_t sty_container;
 
 static void screen_iron_update_timer_cb(lv_timer_t *timer);
+static void screen_iron_delete_cb(lv_event_t *e);
 // static void temperature_control_event_cb(temp_ctl_evt_type_t evt_type, void *target);
 // static void iron_update_observer(iron_t *iron, void *user_data);
 
@@ -27,6 +25,7 @@ typedef struct
     lv_subject_t *subj_power;
     lv_subject_t *subj_state;
     lv_subject_t *subj_hibernate_timer;
+    lv_timer_t *update_timer;
 } screen_iron_user_data_t;
 
 static void setup_styles()
@@ -123,11 +122,11 @@ lv_obj_t *screen_iron_create(lv_obj_t *parent, iron_t *iron)
         lv_obj_set_style_text_align(lbl_temperature, LV_TEXT_ALIGN_RIGHT, 0);
         lv_label_bind_text(lbl_temperature, user_data->subj_temperature, "%.0f");
 
-        lv_obj_set_style_text_font(lbl_temperature, &lv_font_roboto_80, 0);
+        lv_obj_set_style_text_font(lbl_temperature, &font_roboto_regular_80_num, 0);
 
         /* Current Temperature Unit */
         lv_obj_t *lbl_unit = lv_label_create(container_current_temp);
-        lv_obj_set_style_text_font(lbl_unit, &lv_font_roboto_40, 0);
+        lv_obj_set_style_text_font(lbl_unit, &font_roboto_regular_40_num, 0);
         lv_label_set_text(lbl_unit, "°C");
     }
 
@@ -142,7 +141,11 @@ lv_obj_t *screen_iron_create(lv_obj_t *parent, iron_t *iron)
     temperature_control_bind_setpoint(temp_ctl, user_data->subj_setpoint);
     lv_obj_add_event_cb(temp_ctl, temperature_control_event_cb, LV_EVENT_ALL, iron);
 
-    lv_timer_create(screen_iron_update_timer_cb, 100, user_data);
+    /* Add delete event handler for cleanup */
+    lv_obj_add_event_cb(iron_tile, screen_iron_delete_cb, LV_EVENT_DELETE, NULL);
+
+    /* Create and store timer reference */
+    user_data->update_timer = lv_timer_create(screen_iron_update_timer_cb, 100, user_data);
 
     return iron_tile;
 }
@@ -216,4 +219,39 @@ static void screen_iron_update_timer_cb(lv_timer_t *timer)
     lv_subject_set_int(user_data->subj_state, iron_get_state(user_data->iron));
 
     lv_subject_set_int(user_data->subj_hibernate_timer, iron_get_seconds_till_hibernate(user_data->iron));
+}
+
+static void screen_iron_delete_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code != LV_EVENT_DELETE)
+        return;
+
+    lv_obj_t *iron_tile = lv_event_get_target(e);
+    screen_iron_user_data_t *user_data = (screen_iron_user_data_t *)lv_obj_get_user_data(iron_tile);
+
+    if (user_data)
+    {
+        /* Clean up timer */
+        if (user_data->update_timer)
+        {
+            lv_timer_delete(user_data->update_timer);
+            user_data->update_timer = NULL;
+        }
+
+        /* Clean up subjects */
+        if (user_data->subj_setpoint)
+            lv_free(user_data->subj_setpoint);
+        if (user_data->subj_temperature)
+            lv_free(user_data->subj_temperature);
+        if (user_data->subj_power)
+            lv_free(user_data->subj_power);
+        if (user_data->subj_state)
+            lv_free(user_data->subj_state);
+        if (user_data->subj_hibernate_timer)
+            lv_free(user_data->subj_hibernate_timer);
+
+        /* Clean up user data */
+        lv_free(user_data);
+    }
 }
