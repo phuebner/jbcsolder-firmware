@@ -55,4 +55,5 @@ set(SIMULATOR_SOURCES
     ${LVGL_COMMON_SOURCES}
     ${UI_SOURCES}
     ${SIMULATOR_APPLICATION_SOURCES}
+    ${PROJ_PATH}/Hardware/Devices/eeprom.c # Added EEPROM source file
 )

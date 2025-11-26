@@ -47,6 +47,7 @@ set(INCLUDE_DIRS_SIMULATOR
     ${PROJ_PATH}/Application
     ${PROJ_PATH}/Utilities
     ${PROJ_PATH}/Hardware/Devices
+    ${PROJ_PATH}/Simulator/Hardware/Devices
     ${INCLUDE_DIRS_UI}
     ${PROJ_PATH}/Simulator
 )

@@ -16,6 +16,9 @@
 #include "main_screen.h"
 #include "input_devices.h"
 
+#include "eeprom.h"
+#include "eeprom_mock.h"
+
 // #include "../Core/Src/drv/lv_port_indev_encoder.h"
 
 /*********************
@@ -62,14 +65,41 @@ int main(int argc, char **argv)
   hal_init(320, 240);
   InputDevices_Init();
 
-  // hal_lvgl_encoder_init();
+  // Initialize mock EEPROM for simulator
+  eeprom_mock_config_t mock_config = {
+      .storage_file = "eeprom_data.bin", // Persist data to file
+      .simulate_errors = false,          // Disable error simulation by default
+      .error_rate = 0                    // 0% error rate
+  };
+
+  eeprom_result_t result = eeprom_mock_init(&mock_config);
+  if (result != EEPROM_OK)
+  {
+    printf("Failed to initialize mock EEPROM: %s\n", eeprom_result_to_string(result));
+    return result;
+  }
+
+  const eeprom_drv_t *driver = eeprom_mock_get_driver();
+
+  // Now initialize the EEPROM management system with the driver
+  result = eeprom_init(driver);
+  if (result != EEPROM_OK)
+  {
+    printf("Failed to initialize EEPROM management system: %s\n", eeprom_result_to_string(result));
+    return result;
+  }
+
+  printf("EEPROM initialized successfully\n");
+  printf("EEPROM size: %lu bytes\n", (unsigned long)eeprom_get_size());
+  printf("Page size: %u bytes\n", eeprom_get_page_size());
+
   iron_a = iron_init(IRON_IDENTIFIER_A, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
 
   lv_display_set_default(disp_sim_ctl);
   simulation_control_screen_create();
   lv_display_set_default(disp_main);
 
-    gui_init();
+  gui_init();
 
   SDL_TimerID timerID = SDL_AddTimer(10, zero_crossing_callback, NULL); // 50 Hz voltage zero crossing simulation (zero crossing every 10 ms)
   if (timerID == 0)
