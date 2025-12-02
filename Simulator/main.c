@@ -19,6 +19,7 @@
 #include "eeprom.h"
 #include "eeprom_mock.h"
 
+#include "settings.h"
 // #include "../Core/Src/drv/lv_port_indev_encoder.h"
 
 /*********************
@@ -92,6 +93,12 @@ int main(int argc, char **argv)
   printf("EEPROM initialized successfully\n");
   printf("EEPROM size: %lu bytes\n", (unsigned long)eeprom_get_size());
   printf("Page size: %u bytes\n", eeprom_get_page_size());
+
+  load_settings();
+  // print_settings();
+  // settings_set_bool(SETTINGS_ID_BUZZER, true);
+  // print_settings();
+  // save_settings();
 
   iron_a = iron_init(IRON_IDENTIFIER_A, &iron_hw_channel_1, "Iron A", IRON_TYPE_JBC_T245);
 
