@@ -121,6 +121,9 @@ lv_obj_t *button_edge_bottom_create(lv_obj_t *parent, const char *label, const v
     lv_obj_set_align(lv_label_0, LV_ALIGN_RIGHT_MID);
     lv_obj_set_style_pad_top(lv_label_0, 2, 0);
 
+    lv_obj_set_style_width(lv_button_0, 140, 0);
+    lv_obj_align(lv_button_0, LV_ALIGN_BOTTOM_MID, 0, 0);
+
     // lv_obj_set_style_border_width(lv_label_0, 1, 0);
     // lv_obj_set_style_border_color(lv_label_0, TEXT_ON_SURFACE_PRIMARY_LIGHT, 0);
 

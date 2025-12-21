@@ -643,6 +643,7 @@
     LV_FONT_DECLARE(font_roboto_regular_18) \
     LV_FONT_DECLARE(font_roboto_regular_20) \
     LV_FONT_DECLARE(font_roboto_regular_22) \
+    LV_FONT_DECLARE(font_roboto_bold_24) \
     LV_FONT_DECLARE(font_roboto_regular_24) \
     LV_FONT_DECLARE(font_roboto_regular_28) \
     LV_FONT_DECLARE(font_roboto_regular_28_num) \
