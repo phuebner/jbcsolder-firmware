@@ -106,17 +106,17 @@ static eeprom_result_t cat24md1w_read_impl(uint16_t address, uint8_t *data, size
     uint8_t device_addr = g_config.device_address;
     uint8_t mem_addr = (uint8_t)(address & 0xFF);
 
-    // Handle address overflow by using A8 bit in device address
-    if (address > 255)
+    // Handle address overflow by using A16 bit in device address
+    if (address > 0xFFFF)
     {
-        device_addr |= 0x02; // Set A8 bit
+        device_addr |= 0x02; // Set A16 bit
     }
 
     HAL_StatusTypeDef status = HAL_I2C_Mem_Read(
         (I2C_HandleTypeDef *)g_config.i2c_handle,
         device_addr,
         mem_addr,
-        I2C_MEMADD_SIZE_8BIT,
+        I2C_MEMADD_SIZE_16BIT,
         data,
         size,
         CAT24MD1W_I2C_TIMEOUT);
@@ -158,10 +158,10 @@ static eeprom_result_t cat24md1w_write_impl(uint16_t address, const uint8_t *dat
         uint8_t device_addr = g_config.device_address;
         uint8_t mem_addr = (uint8_t)(current_address & 0xFF);
 
-        // Handle address overflow by using A8 bit in device address
-        if (current_address > 255)
+        // Handle address overflow by using A16 bit in device address
+        if (current_address > 0xFFFF)
         {
-            device_addr |= 0x02; // Set A8 bit
+            device_addr |= 0x02; // Set A16 bit
         }
 
         // Write the page
@@ -169,7 +169,7 @@ static eeprom_result_t cat24md1w_write_impl(uint16_t address, const uint8_t *dat
             (I2C_HandleTypeDef *)g_config.i2c_handle,
             device_addr,
             mem_addr,
-            I2C_MEMADD_SIZE_8BIT,
+            I2C_MEMADD_SIZE_16BIT,
             (uint8_t *)(data + bytes_written),
             bytes_to_write,
             CAT24MD1W_I2C_TIMEOUT);

@@ -15,13 +15,13 @@
 /* -------------------------------------------------------------------------- */
 
 // CAT24MD1W specifications
-#define CAT24MD1W_SIZE_BYTES 512U      // 4 Kbit / 8 = 512 bytes
-#define CAT24MD1W_PAGE_SIZE 16U        // 16-byte page size
-#define CAT24MD1W_ADDRESS_MASK 0x01FFU // 9-bit address (512 bytes)
-#define CAT24MD1W_WRITE_CYCLE_TIME 5U  // Maximum write cycle time in ms
+#define CAT24MD1W_SIZE_BYTES 131072U     // 1Mb/ 8 = 131072 bytes
+#define CAT24MD1W_PAGE_SIZE 256U         // 256-byte page size
+#define CAT24MD1W_ADDRESS_MASK 0x01FFFFU // 17-bit address (131072 bytes)
+#define CAT24MD1W_WRITE_CYCLE_TIME 5U    // Maximum write cycle time in ms
 
 // I2C configuration
-#define CAT24MD1W_I2C_ADDRESS 0x50U // Base I2C address (7-bit)
+#define CAT24MD1W_I2C_ADDRESS 0x56U // Base I2C address (7-bit)
 #define CAT24MD1W_I2C_TIMEOUT 100U  // I2C timeout in ms
 
 /* -------------------------------------------------------------------------- */

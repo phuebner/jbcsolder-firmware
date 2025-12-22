@@ -30,6 +30,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "delay.h"
+#include "eeprom.h"
+#include "eeprom_cat24md1w.h"
+#include "settings.h"
 
 #include "iron.h"
 #include "iron_drv.h"
@@ -133,6 +136,38 @@ int main(void)
   lv_port_disp_init(); // Initialize display driver
   InputDevices_Init(); // Initialize input devices
 
+  // Initialize EEPROM with CAT24MD1W driver
+  cat24md1w_config_t cat24md1w_config = {
+      .i2c_handle = &hi2c1,
+      .device_address = CAT24MD1W_I2C_ADDRESS << 1, // Shifted for HAL
+  };
+  eeprom_result_t result = cat24md1w_init(&cat24md1w_config);
+
+  if (result != EEPROM_OK)
+  {
+    printf("Failed to initialize CAT24MD1W EEPROM: %s\n", eeprom_result_to_string(result));
+    // Handle error (e.g., log it, halt execution, etc.)
+    while (1)
+    {
+    }
+  }
+
+  const eeprom_drv_t *cat24md1w_driver = cat24md1w_get_driver();
+  result = eeprom_init(cat24md1w_driver);
+  if (result != EEPROM_OK)
+  {
+    printf("Failed to initialize EEPROM management system: %s\n", eeprom_result_to_string(result));
+    // Handle error (e.g., log it, halt execution, etc.)
+    while (1)
+    {
+    }
+  }
+
+  printf("EEPROM initialized successfully\n");
+  printf("EEPROM size: %lu bytes\n", (unsigned long)eeprom_get_size());
+  printf("Page size: %u bytes\n", eeprom_get_page_size());
+
+  load_settings();
   // HAL_Delay(10);
   // display_fill(0, 0, DISP_HOR, DISP_VER, 0xFFFF, NULL);
   // HAL_Delay(100);
