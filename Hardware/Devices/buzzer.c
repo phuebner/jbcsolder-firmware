@@ -1,7 +1,10 @@
 #include "buzzer.h"
+#include "settings.h"
 #include "stm32f7xx.h"
 
 TIM_HandleTypeDef htim3;
+
+static void Buzzer_Play_Startup_Chime(void);
 
 void Buzzer_Init(void)
 {
@@ -40,6 +43,11 @@ void Buzzer_Init(void)
     // Start PWM
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0); // 0% duty cycle
+
+    if (settings_get_bool(SETTINGS_ID_BUZZER))
+    {
+        Buzzer_Play_Startup_Chime();
+    }
 }
 
 void Buzzer_On(void)
@@ -69,4 +77,20 @@ void Buzzer_Beep(uint16_t duration)
     Buzzer_On();
     HAL_Delay(duration);
     Buzzer_Off();
+}
+
+static void Buzzer_Play_Startup_Chime(void)
+{
+    uint16_t melody[] = {523, 659, 783, 1046}; // C5, E5, G5, C6
+    uint16_t noteDurations[] = {150, 150, 150, 300};
+
+    for (int i = 0; i < 4; i++)
+    {
+        Buzzer_SetFrequency(melody[i]);
+        Buzzer_On();
+        HAL_Delay(noteDurations[i]);
+        Buzzer_Off();
+        HAL_Delay(50);
+    }
+    Buzzer_SetFrequency(4000); // Restore default frequency
 }
